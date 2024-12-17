@@ -12,6 +12,7 @@ class DataGridClipboard {
             debug: false,
             copyAllRows: false,
             includeRowNumbers: false,
+            rowNumberColumnText: '#',
             ...options
         };
         this.debug('Plugin initialized with options:', this.options);
@@ -54,6 +55,8 @@ class DataGridClipboard {
      * @param {boolean} options.copyAllRows - Copy all rows instead of selected rows
      * @param {number[]} options.rowIndexes - Array of specific row indexes to copy
      * @param {Array} options.rowKeys - Array of specific row keys to copy
+     * @param {boolean} options.includeRowNumbers - Include row numbers in copied data
+     * @param {string} options.rowNumberColumnText - Header text for row numbers column
      * @returns {void}
      */
     copy(options = {}) {
@@ -96,7 +99,7 @@ class DataGridClipboard {
                     copyOptions.copyMode === 'data' ? col.dataField : (col.caption || col.dataField)
                 );
                 if (copyOptions.includeRowNumbers) {
-                    headers.unshift('#');
+                    headers.unshift(copyOptions.rowNumberColumnText || '#');
                 }
                 this.debug('Headers:', headers);
                 rows.push(headers.join('\t'));
@@ -119,7 +122,7 @@ class DataGridClipboard {
                     });
 
                     if (copyOptions.includeRowNumbers) {
-                        values.unshift(index + 1);
+                        values.unshift(rowIndex + 1);
                     }
 
                     rows.push(values.join('\t'));

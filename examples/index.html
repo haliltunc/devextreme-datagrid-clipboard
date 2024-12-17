@@ -57,6 +57,26 @@
 
                 <div class="option-group">
                     <div class="option-info">
+                        <div class="option-label">includeRowNumbers</div>
+                        <div class="option-description">Include row numbers in copied data</div>
+                    </div>
+                    <div class="option-value">
+                        <div id="includeRowNumbersCheckbox"></div>
+                    </div>
+                </div>
+
+                <div class="option-group">
+                    <div class="option-info">
+                        <div class="option-label">rowNumberColumnText</div>
+                        <div class="option-description">Header text for row numbers column</div>
+                    </div>
+                    <div class="option-value">
+                        <div id="rowNumberColumnTextInput"></div>
+                    </div>
+                </div>
+
+                <div class="option-group">
+                    <div class="option-info">
                         <div class="option-label">debug</div>
                         <div class="option-description">Enables console logging for debugging purposes</div>
                     </div>
@@ -174,6 +194,18 @@
             onValueChanged: () => initializeClipboard()
         }).dxCheckBox("instance");
 
+        // Initialize include row numbers checkbox
+        const includeRowNumbersCheckbox = $("#includeRowNumbersCheckbox").dxCheckBox({
+            value: false,
+            onValueChanged: () => initializeClipboard()
+        }).dxCheckBox("instance");
+
+        // Initialize row number column text input
+        const rowNumberColumnTextInput = $("#rowNumberColumnTextInput").dxTextBox({
+            value: '#',
+            onValueChanged: () => initializeClipboard()
+        }).dxTextBox("instance");
+
         // Initialize debug mode checkbox
         const debugModeCheckbox = $("#debugModeCheckbox").dxCheckBox({
             text: "true",
@@ -184,7 +216,7 @@
         // Initialize copy-paste plugin
         let clipboard;
 
-        function initializeClipboard() {
+        function initializeClipboard(options = {}) {
             // Destroy existing instance if any
             if (clipboard) {
                 clipboard.destroy();
@@ -195,7 +227,10 @@
                 copyMode: copyModeSelector.option("value"),
                 includeHeaders: includeHeadersCheckbox.option("value"),
                 copyAllRows: copyAllRowsCheckbox.option("value"),
-                debug: debugModeCheckbox.option("value")
+                includeRowNumbers: includeRowNumbersCheckbox.option("value"),
+                rowNumberColumnText: rowNumberColumnTextInput.option("value"),
+                debug: debugModeCheckbox.option("value"),
+                ...options
             });
         }
 
