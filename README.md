@@ -1,6 +1,6 @@
-# devextreme-datagrid-clipboard
+# devextreme-datagrid-clipboard - Clipboard Plugin
 
-A powerful clipboard plugin for DevExtreme DataGrid that enhances data manipulation capabilities. Features customizable copy modes, header inclusion, selective/bulk row copying, and paste validation.
+A powerful clipboard plugin for DevExtreme DataGrid that enhances data manipulation capabilities through copy and paste functionalities. Features customizable copy modes, header inclusion, selective/bulk row copying, and paste validation.
 
 ## Features
 
@@ -13,5 +13,17 @@ A powerful clipboard plugin for DevExtreme DataGrid that enhances data manipulat
 
 ## Installation
 
-```bash
-npm install devextreme-datagrid-clipboard
+    ```bash
+    npm install devextreme-datagrid-clipboard
+    
+## Usage
+
+    ```javascript
+    // Initialize the plugin
+    const clipboard = new DataGridClipboard(dataGridInstance, {
+        copyMode: 'display',
+        includeHeaders: true,
+        copyAllRows: false,
+        debug: true
+    });
+

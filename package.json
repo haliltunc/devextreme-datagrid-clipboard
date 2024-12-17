@@ -1,0 +1,24 @@
+{
+  "name": "devextreme-datagrid-clipboard",
+  "version": "1.0.0",
+  "description": "A powerful clipboard plugin for DevExtreme DataGrid that enhances data manipulation capabilities",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "http-server . -p 8081"
+  },
+  "dependencies": {
+    "http-server": "^14.1.1"
+  },
+  "keywords": [
+    "devextreme",
+    "datagrid",
+    "clipboard",
+    "copy",
+    "paste",
+    "data-manipulation",
+    "grid"
+  ],
+  "author": "",
+  "license": "MIT"
+}

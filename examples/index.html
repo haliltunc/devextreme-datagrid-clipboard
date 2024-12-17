@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>DevExtreme DataGrid Clipboard Demo</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- DevExtreme dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/23.1.6/css/dx.light.css">
+    <script src="https://cdn3.devexpress.com/jslib/23.1.6/js/dx.all.js"></script>
+
+    <!-- Clipboard Plugin -->
+    <script src="../src/index.js"></script>
+
+    <!-- Demo files -->
+    <link rel="stylesheet" href="styles.css">
+    <script src="data.js"></script>
+    <!-- <script src="demo.js"></script> -->
+</head>
+
+<body>
+    <div class="demo-container">
+        <!-- DataGrid -->
+        <div class="grid-container">
+            <div id="gridContainer"></div>
+        </div>
+
+        <!-- Plugin Options -->
+        <div class="options-container">
+            <div class="options-title">DataGridClipboard Properties</div>
+            <div class="options-grid">
+                <div class="option-group">
+                    <div class="option-info">
+                        <div class="option-label">copyMode</div>
+                        <div class="option-description">Determines how values are copied from the grid</div>
+                    </div>
+                    <div class="option-value" id="copyModeSelector"></div>
+                </div>
+
+                <div class="option-group">
+                    <div class="option-info">
+                        <div class="option-label">includeHeaders</div>
+                        <div class="option-description">When true, includes column headers in copied content</div>
+                    </div>
+                    <div class="option-value" id="includeHeadersCheckbox"></div>
+                </div>
+
+                <div class="option-group">
+                    <div class="option-info">
+                        <div class="option-label">copyAllRows</div>
+                        <div class="option-description">When true, copies all visible rows instead of selection</div>
+                    </div>
+                    <div class="option-value" id="copyAllRowsCheckbox"></div>
+                </div>
+
+                <div class="option-group">
+                    <div class="option-info">
+                        <div class="option-label">debug</div>
+                        <div class="option-description">Enables console logging for debugging purposes</div>
+                    </div>
+                    <div class="option-value" id="debugModeCheckbox"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    $(() => {
+        // Initialize DataGrid
+        const grid = $("#gridContainer").dxDataGrid({
+            dataSource: demoData,
+            keyExpr: "id",
+            columns: [
+                { dataField: "id", caption: "ID" },
+                { dataField: "name", caption: "Full Name" },
+                {
+                    dataField: "status",
+                    caption: "Status",
+                    lookup: {
+                        dataSource: statusData,
+                        valueExpr: "id",
+                        displayExpr: "name"
+                    }
+                },
+                { dataField: "age", caption: "Age" },
+                { dataField: "city", caption: "City", visible: false }
+            ],
+            allowColumnReordering: true,
+            selection: {
+                mode: "multiple"
+            },
+            toolbar: {
+                items: [
+
+                    {
+                        widget: 'dxDropDownButton',
+                        options: {
+                            text: 'Copy Options',
+                            icon: 'copy',
+                            width: 150,
+                            dropDownOptions: {
+                                width: 300
+                            },
+                            items: [
+                                {
+                                    text: 'Copy',
+                                    icon: 'copy',
+                                    onClick: () => clipboard.copy()
+                                },
+                                {
+                                    text: 'Copy as Displayed',
+                                    icon: 'copy',
+                                    onClick: () => clipboard.copy({ copyMode: 'display' })
+                                },
+                                {
+                                    text: 'Copy Raw Values',
+                                    icon: 'copy',
+                                    onClick: () => clipboard.copy({ copyMode: 'data' })
+                                },
+                                {
+                                    text: 'Copy with Headers',
+                                    icon: 'copy',
+                                    onClick: () => clipboard.copy({ includeHeaders: true })
+                                },
+                                {
+                                    text: 'Copy All Rows',
+                                    icon: 'copy',
+                                    onClick: () => clipboard.copy({ copyAllRows: true })
+                                },
+                                {
+                                    text: 'Copy Specific Rows (1st & 3rd)',
+                                    icon: 'copy',
+                                    onClick: () => clipboard.copyRows([0, 2])
+                                },
+                                {
+                                    text: 'Copy by ID (1 & 3)',
+                                    icon: 'copy',
+                                    onClick: () => clipboard.copyRowsByKey([1, 3])
+                                }
+                            ]
+                        },
+                        location: 'after'
+                    }
+                ]
+            }
+        }).dxDataGrid('instance');
+
+        // Initialize copy mode selector
+        const copyModeSelector = $("#copyModeSelector").dxSelectBox({
+            items: [
+                { text: "display", value: "display" },
+                { text: "data", value: "data" }
+            ],
+            displayExpr: "text",
+            valueExpr: "value",
+            value: "display",
+            width: "100%",
+            onValueChanged: () => initializeClipboard()
+        }).dxSelectBox("instance");
+
+        // Initialize headers checkbox
+        const includeHeadersCheckbox = $("#includeHeadersCheckbox").dxCheckBox({
+            text: "true",
+            value: false,
+            onValueChanged: () => initializeClipboard()
+        }).dxCheckBox("instance");
+
+        // Initialize copy all rows checkbox
+        const copyAllRowsCheckbox = $("#copyAllRowsCheckbox").dxCheckBox({
+            text: "true",
+            value: false,
+            onValueChanged: () => initializeClipboard()
+        }).dxCheckBox("instance");
+
+        // Initialize debug mode checkbox
+        const debugModeCheckbox = $("#debugModeCheckbox").dxCheckBox({
+            text: "true",
+            value: true,
+            onValueChanged: () => initializeClipboard()
+        }).dxCheckBox("instance");
+
+        // Initialize copy-paste plugin
+        let clipboard;
+
+        function initializeClipboard() {
+            // Destroy existing instance if any
+            if (clipboard) {
+                clipboard.destroy();
+            }
+
+            // Create new instance
+            clipboard = new DataGridClipboard(grid, {
+                copyMode: copyModeSelector.option("value"),
+                includeHeaders: includeHeadersCheckbox.option("value"),
+                copyAllRows: copyAllRowsCheckbox.option("value"),
+                debug: debugModeCheckbox.option("value")
+            });
+        }
+
+        // Initial plugin initialization
+        initializeClipboard();
+    });
+
+</script>
+
+</html>
