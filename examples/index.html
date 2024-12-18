@@ -29,7 +29,7 @@
 
         <!-- Plugin Options -->
         <div class="options-container">
-            <div class="options-title">DataGridClipboard Properties</div>
+            <div class="options-title">Properties</div>
             <div class="options-grid">
                 <div class="option-group">
                     <div class="option-info">
@@ -198,14 +198,12 @@
 
         // Initialize headers checkbox
         const includeHeadersCheckbox = $("#includeHeadersCheckbox").dxCheckBox({
-            text: "true",
             value: false,
             onValueChanged: () => initializeClipboard()
         }).dxCheckBox("instance");
 
         // Initialize copy all rows checkbox
         const copyAllRowsCheckbox = $("#copyAllRowsCheckbox").dxCheckBox({
-            text: "true",
             value: false,
             onValueChanged: () => initializeClipboard()
         }).dxCheckBox("instance");
@@ -224,21 +222,18 @@
 
         // Initialize debug mode checkbox
         const debugModeCheckbox = $("#debugModeCheckbox").dxCheckBox({
-            text: "true",
             value: false,
             onValueChanged: () => initializeClipboard()
         }).dxCheckBox("instance");
 
         // Initialize show operation info checkbox
         const showOperationInfoCheckbox = $("#showOperationInfoCheckbox").dxCheckBox({
-            text: "true",
             value: true,
             onValueChanged: () => initializeClipboard()
         }).dxCheckBox("instance");
 
         // Initialize show data preview in operation info checkbox
         const showDataPreviewInOperationInfoCheckbox = $("#showDataPreviewInOperationInfoCheckbox").dxCheckBox({
-            text: "true",
             value: true,
             onValueChanged: () => initializeClipboard()
         }).dxCheckBox("instance");

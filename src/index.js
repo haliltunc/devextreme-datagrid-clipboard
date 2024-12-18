@@ -14,6 +14,7 @@ class DataGridClipboard {
             includeRowNumbers: false,
             rowNumberColumnText: '#',
             showOperationInfo: true,
+            showDataPreviewInOperationInfo: true,
             ...options
         };
 
@@ -93,12 +94,12 @@ class DataGridClipboard {
             const previewRows = rows.slice(0, Math.min(3, rows.length));
             
             this.notify(
-                `Copied (${rowCount} rows × ${columnCount} columns)`,
-                this.createTablePreview(previewRows, {
+                `Copied (${rowCount} × ${columnCount})`,
+                copyOptions.showDataPreviewInOperationInfo ? this.createTablePreview(previewRows, {
                     hasHeaders: copyOptions.includeHeaders,
                     showTotal: rows.length > 3,
                     totalRows: rowCount
-                }),
+                }) : '',
                 'success',
                 copyOptions
             );
@@ -158,11 +159,11 @@ class DataGridClipboard {
                 const showTotal = data.length > 3;
                 const previewRows = data.slice(0, Math.min(3, data.length));
 
-                const preview = this.createTablePreview(previewRows, {
+                const preview = pasteOptions.showDataPreviewInOperationInfo ? this.createTablePreview(previewRows, {
                     hasHeaders: false,
                     showTotal,
                     totalRows: data.length
-                });
+                }) : '';
                 this.notify(
                     title,
                     preview,
@@ -214,6 +215,9 @@ class DataGridClipboard {
      * @private
      */
     createTablePreview(rows, { hasHeaders = false, showTotal = false, totalRows = 0 } = {}) {
+        
+        let table = [];
+        
         if (!rows?.length) return '';
 
         const dataRows = hasHeaders ? rows.slice(1) : rows;
@@ -226,7 +230,7 @@ class DataGridClipboard {
         const renderRow = (cells, tag = 'td') => 
             `<tr>${cells.map(cell => `<${tag}>${truncateText(cell)}</${tag}>`).join('')}</tr>`;
 
-        const table = ['<table class="preview-table">'];
+        table.push('<table class="preview-table">');
         
         if (headers) {
             table.push('<thead>', renderRow(headers, 'th'), '</thead>');
