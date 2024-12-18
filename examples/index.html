@@ -82,6 +82,22 @@
                     </div>
                     <div class="option-value" id="debugModeCheckbox"></div>
                 </div>
+
+                <div class="option-group">
+                    <div class="option-info">
+                        <div class="option-label">showOperationInfo</div>
+                        <div class="option-description">Show operation notifications</div>
+                    </div>
+                    <div class="option-value" id="showOperationInfoCheckbox"></div>
+                </div>
+
+                <div class="option-group">
+                    <div class="option-info">
+                        <div class="option-label">showDataPreviewInOperationInfo</div>
+                        <div class="option-description">Show data preview in operation info notifications</div>
+                    </div>
+                    <div class="option-value" id="showDataPreviewInOperationInfoCheckbox"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -209,6 +225,20 @@
         // Initialize debug mode checkbox
         const debugModeCheckbox = $("#debugModeCheckbox").dxCheckBox({
             text: "true",
+            value: false,
+            onValueChanged: () => initializeClipboard()
+        }).dxCheckBox("instance");
+
+        // Initialize show operation info checkbox
+        const showOperationInfoCheckbox = $("#showOperationInfoCheckbox").dxCheckBox({
+            text: "true",
+            value: true,
+            onValueChanged: () => initializeClipboard()
+        }).dxCheckBox("instance");
+
+        // Initialize show data preview in operation info checkbox
+        const showDataPreviewInOperationInfoCheckbox = $("#showDataPreviewInOperationInfoCheckbox").dxCheckBox({
+            text: "true",
             value: true,
             onValueChanged: () => initializeClipboard()
         }).dxCheckBox("instance");
@@ -230,6 +260,8 @@
                 includeRowNumbers: includeRowNumbersCheckbox.option("value"),
                 rowNumberColumnText: rowNumberColumnTextInput.option("value"),
                 debug: debugModeCheckbox.option("value"),
+                showOperationInfo: showOperationInfoCheckbox.option("value"),
+                showDataPreviewInOperationInfo: showDataPreviewInOperationInfoCheckbox.option("value"),
                 ...options
             });
         }
