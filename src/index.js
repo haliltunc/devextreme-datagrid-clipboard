@@ -1,9 +1,26 @@
 /**
  * DevExtreme DataGrid Clipboard Plugin
  * Adds clipboard functionality to DevExtreme DataGrid
+ * 
+ * @class DataGridClipboard
+ * @param {Object} dataGrid - DevExtreme DataGrid instance
+ * @param {Object} options - Plugin options
+ * @param {string} options.copyMode - Copy mode ('display' or 'data')
+ * @param {boolean} options.includeHeaders - Include column headers in copied data
+ * @param {boolean} options.debug - Enable debug logging
+ * @param {boolean} options.copyAllRows - Copy all rows instead of selected rows
+ * @param {number[]} options.rowIndexes - Array of specific row indexes to copy
+ * @param {Array} options.rowKeys - Array of specific row keys to copy
+ * @param {boolean} options.includeRowNumbers - Include row numbers in copied data
+ * @param {string} options.rowNumberColumnText - Header text for row numbers column (default: '#')
+ * @param {boolean} options.showOperationInfo - Show operation notifications (default: true)
+ * @param {boolean} options.showDataPreviewInOperationInfo - Show data preview in operation notifications (default: true)
  */
-
 class DataGridClipboard {
+    /**
+     * Initialize the plugin
+     * @private
+     */
     constructor(dataGrid, options = {}) {
         this.dataGrid = dataGrid;
         this.options = {
@@ -34,6 +51,10 @@ class DataGridClipboard {
         this.init();
     }
 
+    /**
+     * Initialize the plugin
+     * @private
+     */
     init() {
         // Remove any existing event handlers
         this.destroy();
@@ -41,6 +62,10 @@ class DataGridClipboard {
         this.attachEvents();
     }
 
+    /**
+     * Attach event handlers to the DataGrid
+     * @private
+     */
     attachEvents() {
         this.keyDownHandler = (e) => {
             const isCopy = (e.event.ctrlKey || e.event.metaKey) && e.event.keyCode === 67;
@@ -72,7 +97,8 @@ class DataGridClipboard {
      * @param {Array} options.rowKeys - Array of specific row keys to copy
      * @param {boolean} options.includeRowNumbers - Include row numbers in copied data
      * @param {string} options.rowNumberColumnText - Header text for row numbers column
-     * @returns {void}
+     * @param {boolean} options.showOperationInfo - Show operation notifications
+     * @param {boolean} options.showDataPreviewInOperationInfo - Show data preview in notifications
      */
     copy(options = {}) {
         const copyOptions = { ...this.options, ...options };
@@ -118,7 +144,6 @@ class DataGridClipboard {
      * Copy specific rows by their indexes
      * @param {number[]} indexes - Array of row indexes to copy
      * @param {Object} options - Additional copy options
-     * @returns {void}
      */
     copyRows(indexes, options = {}) {
         this.copy({ ...options, rowIndexes: indexes });
@@ -128,79 +153,109 @@ class DataGridClipboard {
      * Copy specific rows by their keys
      * @param {Array} keys - Array of row keys to copy
      * @param {Object} options - Additional copy options
-     * @returns {void}
      */
     copyRowsByKey(keys, options = {}) {
         this.copy({ ...options, rowKeys: keys });
     }
 
     /**
-     * Paste data into the grid
-     * @returns {void}
+     * Gets row data based on row keys and options
+     * @param {Array} rowKeys - Array of row keys
+     * @param {Object} options - Copy options
+     * @returns {Object} Object containing rows and column count
+     * @private
      */
-    paste(options = {}) {
-        const pasteOptions = { ...this.options, ...options };
+    getRowData(rowKeys, options) {
+        const columns = options.copyMode === 'data' 
+            ? this.dataGrid.option('columns')
+            : this.dataGrid.getVisibleColumns();
 
-        navigator.clipboard.readText()
-            .then(text => {
-                const data = this.parseClipboardData(text);
-                if (!data || !data.length) {
-                    this.notify(
-                        'No valid data found to paste',
-                        '',
-                        'error',
-                        pasteOptions
-                    );
-                    return;
+        const rows = [];
+        const processValue = (value, column) => {
+            if (value === undefined || value === null) return '';
+            
+            if (options.copyMode === 'display' && column.lookup) {
+                const lookupItem = column.lookup.dataSource.find(
+                    item => item[column.lookup.valueExpr] === value
+                );
+                return lookupItem ? lookupItem[column.lookup.displayExpr] : '';
+            }
+            
+            return value;
+        };
+
+        if (options.includeHeaders) {
+            const headers = columns.map(col => 
+                options.copyMode === 'data' ? col.dataField : (col.caption || col.dataField)
+            );
+            if (options.includeRowNumbers) {
+                headers.unshift(options.rowNumberColumnText);
+            }
+            rows.push(headers);
+        }
+
+        rowKeys.forEach((key, index) => {
+            const rowIndex = this.dataGrid.getRowIndexByKey(key);
+            if (rowIndex >= 0) {
+                const values = columns.map(column => 
+                    processValue(this.dataGrid.cellValue(rowIndex, column.dataField), column)
+                );
+
+                if (options.includeRowNumbers) {
+                    values.unshift(rowIndex + 1);
                 }
 
-                this.debug('Pasting data:', data);
-                const title = `Pasted ${data.length} rows`;
-                const showTotal = data.length > 3;
-                const previewRows = data.slice(0, Math.min(3, data.length));
+                rows.push(values);
+            }
+        });
 
-                const preview = pasteOptions.showDataPreviewInOperationInfo ? this.createTablePreview(previewRows, {
-                    hasHeaders: false,
-                    showTotal,
-                    totalRows: data.length
-                }) : '';
-                this.notify(
-                    title,
-                    preview,
-                    'success',
-                    pasteOptions
-                );
-            })
-            .catch(err => {
-                this.error('Clipboard read error:', err);
-                this.notify(
-                    'Paste operation failed',
-                    '',
-                    'error',
-                    pasteOptions
-                );
-            });
+        return {
+            rows,
+            columnCount: columns.length + (options.includeRowNumbers ? 1 : 0)
+        };
     }
 
+    /**
+     * Parse clipboard data into a 2D array
+     * @param {string} text - Text from clipboard
+     * @returns {Array<Array<string>>} Parsed data as 2D array
+     * @private
+     */
     parseClipboardData(text) {
-        return text.split('\n').map(row => row.split('\t'));
+        if (!text?.trim()) return [];
+        return text.split('\n')
+            .map(row => row.trim())
+            .filter(Boolean)
+            .map(row => row.split('\t'));
     }
 
+    /**
+     * Copy text to clipboard
+     * @param {string} text - Text to copy
+     * @returns {boolean} Success status
+     * @private
+     */
     copyToClipboard(text) {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
-        
+        if (!text) return false;
+
         try {
-            document.execCommand('copy');
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text);
+                return true;
+            }
+
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.cssText = 'position:fixed;pointer-events:none;opacity:0;';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            const success = document.execCommand('copy');
             document.body.removeChild(textarea);
-            return true;
+            return success;
         } catch (err) {
-            document.body.removeChild(textarea);
-            throw new Error('Failed to copy text to clipboard');
+            this.error('Failed to copy text to clipboard:', err);
+            return false;
         }
     }
 
@@ -215,35 +270,33 @@ class DataGridClipboard {
      * @private
      */
     createTablePreview(rows, { hasHeaders = false, showTotal = false, totalRows = 0 } = {}) {
-        
-        let table = [];
-        
         if (!rows?.length) return '';
 
-        const dataRows = hasHeaders ? rows.slice(1) : rows;
-        const headers = hasHeaders ? rows[0] : null;
         const truncateText = text => {
             text = String(text || '');
             return text.length > 15 ? text.substr(0, 15) + '...' : text;
         };
 
-        const renderRow = (cells, tag = 'td') => 
-            `<tr>${cells.map(cell => `<${tag}>${truncateText(cell)}</${tag}>`).join('')}</tr>`;
+        const renderRow = (cells, tag = 'td') => cells
+            .map(cell => `<${tag}>${truncateText(cell)}</${tag}>`)
+            .join('');
 
-        table.push('<table class="preview-table">');
+        const table = ['<table class="preview-table">'];
+        const dataRows = hasHeaders ? rows.slice(1) : rows;
+        const headers = hasHeaders ? rows[0] : null;
         
         if (headers) {
-            table.push('<thead>', renderRow(headers, 'th'), '</thead>');
+            table.push('<thead>', `<tr>${renderRow(headers, 'th')}</tr>`, '</thead>');
         }
 
         table.push(
             '<tbody>',
-            ...dataRows.map(row => renderRow(row)),
+            ...dataRows.map(row => `<tr>${renderRow(row)}</tr>`),
             showTotal ? `<tr class="total-row"><td colspan="${(headers || dataRows[0]).length}">... Total ${totalRows} rows copied ...</td></tr>` : '',
-            '</tbody>'
+            '</tbody>',
+            '</table>'
         );
 
-        table.push('</table>');
         return table.join('');
     }
 
@@ -291,6 +344,8 @@ class DataGridClipboard {
 
     /**
      * Gets row keys based on options
+     * @param {Object} options - Copy options
+     * @returns {Array} Array of row keys
      * @private
      */
     getRowKeys(options) {
@@ -326,56 +381,8 @@ class DataGridClipboard {
     }
 
     /**
-     * Gets row data based on row keys and options
-     * @private
+     * Clean up event handlers
      */
-    getRowData(rowKeys, options) {
-        const columns = options.copyMode === 'data' 
-            ? this.dataGrid.option('columns')
-            : this.dataGrid.getVisibleColumns();
-
-        const rows = [];
-        if (options.includeHeaders) {
-            const headers = columns.map(col => 
-                options.copyMode === 'data' ? col.dataField : (col.caption || col.dataField)
-            );
-            if (options.includeRowNumbers) {
-                headers.unshift(options.rowNumberColumnText);
-            }
-            rows.push(headers);
-        }
-
-        rowKeys.forEach((key, index) => {
-            const rowIndex = this.dataGrid.getRowIndexByKey(key);
-            if (rowIndex >= 0) {
-                const values = columns.map(column => {
-                    const value = this.dataGrid.cellValue(rowIndex, column.dataField);
-                    
-                    if (options.copyMode === 'display' && column.lookup) {
-                        const lookupItem = column.lookup.dataSource.find(
-                            item => item[column.lookup.valueExpr] === value
-                        );
-                        return lookupItem ? lookupItem[column.lookup.displayExpr] : '';
-                    }
-                    
-                    return value ?? '';
-                });
-
-                if (options.includeRowNumbers) {
-                    values.unshift(rowIndex + 1);
-                }
-
-                rows.push(values);
-            }
-        });
-
-        return {
-            rows,
-            columnCount: columns.length + (options.includeRowNumbers ? 1 : 0)
-        };
-    }
-
-    // Debug helper methods
     destroy() {
         if (this.keyDownHandler) {
             this.dataGrid.off('keyDown', this.keyDownHandler);
