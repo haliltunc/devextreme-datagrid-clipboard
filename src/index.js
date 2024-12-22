@@ -32,7 +32,7 @@
      * @param {string} options.rowNumberColumnText - Header text for row numbers column (default: '#')
      * @param {boolean} options.showOperationInfo - Show operation notifications (default: true)
      * @param {boolean} options.showDataPreviewInOperationInfo - Show data preview in operation notifications (default: true)
-     * @param {string} options.locale - Locale code for messages (default: 'en')
+     * @param {string} options.language - Language code for messages (default: 'en')
      */
     class DataGridClipboard {
         /**
@@ -50,12 +50,12 @@
                 rowNumberColumnText: '#',
                 showOperationInfo: true,
                 showDataPreviewInOperationInfo: true,
-                locale: 'en',
+                language: 'en',
                 ...options
             };
 
-            // Get messages for current locale
-            this.messages = this.getMessages(this.options.locale);
+            // Get messages for current language
+            this.messages = this.getMessages(this.options.language);
 
             // Initialize debug functions
             const createDebugger = (name, isError = false) => {
@@ -74,13 +74,13 @@
         }
 
         /**
-         * Get messages for specified locale
-         * @param {string} locale - Locale code
+         * Get messages for specified language
+         * @param {string} language - Language code
          * @returns {Object} Messages object
          * @private
          */
-        getMessages(locale) {
-            return window.DataGridClipboardLocales[locale] || window.DataGridClipboardLocales.en;
+        getMessages(language) {
+            return window.DataGridClipboardLocales[language] || window.DataGridClipboardLocales.en;
         }
 
         /**
@@ -97,13 +97,13 @@
         }
 
         /**
-         * Set locale for messages
-         * @param {string} locale - Locale code
+         * Set language for messages
+         * @param {string} language - Language code
          */
-        setLocale(locale) {
-            this.options.locale = locale;
-            this.messages = this.getMessages(locale);
-            this.debug('Locale changed to:', locale);
+        setLanguage(language) {
+            this.options.language = language;
+            this.messages = this.getMessages(language);
+            this.debug('Language changed to:', language);
         }
 
         /**
