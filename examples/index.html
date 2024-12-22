@@ -18,6 +18,10 @@
     <link rel="stylesheet" href="styles.css">
     <script src="data.js"></script>
     <!-- <script src="demo.js"></script> -->
+     
+    <!-- Locales -->
+    <script src="locales/tr.js"></script>
+
 </head>
 
 <body>
@@ -32,6 +36,14 @@
         <div class="options-container">
             <div class="options-title">Properties</div>
             <div class="options-grid">
+                <div class="option-group">
+                    <div class="option-info">
+                        <div class="option-label">Language</div>
+                        <div class="option-description">Select plugin message language</div>
+                    </div>
+                    <div class="option-value" id="languageSelector"></div>
+                </div>
+
                 <div class="option-group">
                     <div class="option-info">
                         <div class="option-label">copyMode</div>
@@ -184,6 +196,23 @@
             }
         }).dxDataGrid('instance');
 
+        // Initialize language selector
+        const languageSelector = $("#languageSelector").dxSelectBox({
+            items: [
+                { text: 'English', value: 'en' },
+                { text: 'Türkçe', value: 'tr' }
+            ],
+            displayExpr: "text",
+            valueExpr: "value",
+            value: 'en',
+            width: "100%",
+            onValueChanged: function (e) {
+                if (clipboard) {
+                    clipboard.setLocale(e.value);
+                }
+            }
+        }).dxSelectBox("instance");
+
         // Initialize copy mode selector
         const copyModeSelector = $("#copyModeSelector").dxSelectBox({
             items: [
@@ -258,6 +287,7 @@
                 debug: debugModeCheckbox.option("value"),
                 showOperationInfo: showOperationInfoCheckbox.option("value"),
                 showDataPreviewInOperationInfo: showDataPreviewInOperationInfoCheckbox.option("value"),
+                locale: languageSelector.option("value"),
                 ...options
             });
         }
