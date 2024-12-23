@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DevExtreme DataGrid Clipboard - Store Grid Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- DevExtreme dependencies -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn3.devexpress.com/jslib/23.1.6/js/dx.all.js"></script>
+    <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/23.1.6/css/dx.light.css">
+
+    <!-- Plugin -->
+    <script src="../src/index.js"></script>
+
+    <style>
+        .demo-container {
+            margin: 50px;
+        }
+        .title {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .description {
+            margin-bottom: 30px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1 class="title">Store-based Grid Example</h1>
+        <p class="description">
+            This example demonstrates how the clipboard plugin works with a DataGrid that uses DevExtreme Store for its data source.
+            The grid data is loaded from a store, and the lookup column also uses a store.
+        </p>
+        <div id="gridContainer"></div>
+    </div>
+
+    <script>
+        $(() => {
+            // Create a custom store for status data
+            const statusStore = new DevExpress.data.ArrayStore({
+                data: [
+                    { id: 1, name: 'Active' },
+                    { id: 2, name: 'On Leave' },
+                    { id: 3, name: 'Terminated' }
+                ],
+                key: 'id'
+            });
+
+            // Create a custom store for employee data
+            const employeeStore = new DevExpress.data.ArrayStore({
+                data: [{
+                    id: 1,
+                    name: 'John Smith',
+                    statusId: 1,
+                    age: 30
+                }, {
+                    id: 2,
+                    name: 'Sarah Johnson',
+                    statusId: 2,
+                    age: 25
+                }, {
+                    id: 3,
+                    name: 'Michael Brown',
+                    statusId: 1,
+                    age: 35
+                }],
+                key: 'id',
+                onInserting: function(values) {
+                    // Log the inserting operation
+                    console.log('Inserting:', values);
+                },
+                onInserted: function(values, key) {
+                    // Log the inserted data
+                    console.log('Inserted:', values, 'with key:', key);
+                }
+            });
+
+            // Create DataSource for the grid
+            const gridDataSource = new DevExpress.data.DataSource({
+                store: employeeStore,
+                paginate: true,
+                pageSize: 10
+            });
+
+            // Initialize DataGrid
+            const grid = $("#gridContainer").dxDataGrid({
+                dataSource: gridDataSource,
+                keyExpr: "id",
+                showBorders: true,
+                allowColumnReordering: true,
+                selection: {
+                    mode: "multiple"
+                },
+                columnChooser: {
+                    enabled: true,
+                    mode: 'select'
+                },
+                toolbar: {
+                    items: [{
+                        widget: 'dxButton',
+                        location: 'after',
+                        options: {
+                            icon: 'copy',
+                            hint: 'Copy',
+                            onClick: function() {
+                                clipboard.copy();
+                            }
+                        }
+                    }, {
+                        widget: 'dxButton',
+                        location: 'after',
+                        options: {
+                            icon: 'paste',
+                            hint: 'Paste',
+                            onClick: function() {
+                                clipboard.paste();
+                            }
+                        }
+                    }, {
+                        widget: 'dxButton',
+                        location: 'after',
+                        options: {
+                            icon: 'columnchooser',
+                            hint: 'Column Chooser',
+                            onClick: function() {
+                                grid.showColumnChooser();
+                            }
+                        }
+                    }]
+                },
+                columns: [{
+                    dataField: "id",
+                    caption: "ID"
+                }, {
+                    dataField: "name",
+                    caption: "Full Name"
+                }, {
+                    dataField: "statusId",
+                    caption: "Status",
+                    lookup: {
+                        dataSource: statusStore,
+                        valueExpr: "id",
+                        displayExpr: "name"
+                    }
+                }, {
+                    dataField: "age",
+                    caption: "Age"
+                }]
+            }).dxDataGrid('instance');
+
+            // Initialize clipboard plugin
+            const clipboard = new DataGridClipboard(grid, {
+                debug: true
+            });
+        });
+    </script>
+</body>
+</html>
