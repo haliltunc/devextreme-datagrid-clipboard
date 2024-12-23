@@ -145,15 +145,6 @@
         /**
          * Copy data from the grid
          * @param {Object} options - Override default copy options
-         * @param {string} options.copyMode - Copy mode ('display' or 'data')
-         * @param {boolean} options.includeHeaders - Include column headers in copied data
-         * @param {boolean} options.copyAllRows - Copy all rows instead of selected rows
-         * @param {number[]} options.rowIndexes - Array of specific row indexes to copy
-         * @param {Array} options.rowKeys - Array of specific row keys to copy
-         * @param {boolean} options.includeRowNumbers - Include row numbers in copied data
-         * @param {string} options.rowNumberColumnText - Header text for row numbers column
-         * @param {boolean} options.showOperationInfo - Show operation notifications
-         * @param {boolean} options.showDataPreviewInOperationInfo - Show data preview in notifications
          */
         copy(options = {}) {
             const copyOptions = { ...this.options, ...options };
@@ -225,6 +216,9 @@
                 ? this.dataGrid.option('columns')
                 : this.dataGrid.getVisibleColumns();
 
+            // Filter out selection column
+            const filteredColumns = columns.filter(col => !col.command && col.type !== "selection");
+
             const rows = [];
             const processValue = (value, column) => {
                 if (value === undefined || value === null) return '';
@@ -240,7 +234,7 @@
             };
 
             if (options.includeHeaders) {
-                const headers = columns.map(col => 
+                const headers = filteredColumns.map(col => 
                     options.copyMode === 'data' ? col.dataField : (col.caption || col.dataField)
                 );
                 if (options.includeRowNumbers) {
@@ -252,7 +246,7 @@
             rowKeys.forEach((key, index) => {
                 const rowIndex = this.dataGrid.getRowIndexByKey(key);
                 if (rowIndex >= 0) {
-                    const values = columns.map(column => 
+                    const values = filteredColumns.map(column => 
                         processValue(this.dataGrid.cellValue(rowIndex, column.dataField), column)
                     );
 
@@ -266,22 +260,25 @@
 
             return {
                 rows,
-                columnCount: columns.length + (options.includeRowNumbers ? 1 : 0)
+                columnCount: filteredColumns.length + (options.includeRowNumbers ? 1 : 0)
             };
         }
 
         /**
-         * Parse clipboard data into a 2D array
+         * Parse clipboard data into array format
          * @param {string} text - Text from clipboard
-         * @returns {Array<Array<string>>} Parsed data as 2D array
-         * @private
+         * @returns {Array} Array of row data
          */
         parseClipboardData(text) {
-            if (!text?.trim()) return [];
-            return text.split('\n')
-                .map(row => row.trim())
-                .filter(Boolean)
-                .map(row => row.split('\t'));
+            const result = text.split(/\r?\n/)
+                .filter(line => line.trim())
+                .map(line => line.split('\t'));
+            
+            // Debug: Log raw clipboard data
+            this.debug('Raw clipboard text:', text);
+            this.debug('Parsed clipboard data:', result);
+            
+            return result;
         }
 
         /**
@@ -432,6 +429,139 @@
             }
             
             return selectedKeys;
+        }
+
+        /**
+         * Generate a GUID
+         * @private
+         * @returns {string} Generated GUID
+         */
+        generateGuid() {
+            // Always start with 'a' to prevent numeric conversion
+            return 'a' + 'xxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        /**
+         * Process value for paste operation
+         * @param {*} value - Value to process
+         * @param {Object} column - Column configuration
+         * @returns {*} Processed value
+         * @private
+         */
+        processValueForPaste(value, column) {
+            if (value === undefined || value === null || value === '') return '';
+
+            // If column has lookup, convert display value to actual value
+            if (column.lookup) {
+                const lookupItem = column.lookup.dataSource.find(
+                    item => String(item[column.lookup.displayExpr]).toLowerCase() === String(value).toLowerCase()
+                );
+                return lookupItem ? lookupItem[column.lookup.valueExpr] : value;
+            }
+
+            return value;
+        }
+
+        /**
+         * Paste data into the grid
+         * @param {Object} options - Override default paste options
+         */
+        async paste(options = {}) {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (!text) {
+                    this.notify(this.messages.noDataToPaste, '', 'warning', options);
+                    return;
+                }
+
+                const data = this.parseClipboardData(text);
+                if (!data || !data.length) {
+                    this.notify(this.messages.noDataToPaste, '', 'warning', options);
+                    return;
+                }
+
+                const keyField = this.dataGrid.option('keyExpr');
+                const store = this.dataGrid.getDataSource().store();
+                const columns = this.dataGrid.getVisibleColumns()
+                    .filter(col => !col.command && col.type !== "selection") // Filter out command and selection columns
+                    .sort((a, b) => (a.visibleIndex || 0) - (b.visibleIndex || 0)); // Sort by visible index
+
+                // Debug: Log column info
+                this.debug('Columns:', columns.map(col => ({
+                    dataField: col.dataField,
+                    visibleIndex: col.visibleIndex,
+                    caption: col.caption,
+                    lookup: col.lookup ? {
+                        valueExpr: col.lookup.valueExpr,
+                        displayExpr: col.lookup.displayExpr
+                    } : undefined
+                })));
+
+                // Process each row
+                for (const row of data) {
+                    // Debug: Log current row data
+                    this.debug('Processing row:', row);
+
+                    const newRow = {};
+
+                    // Map data to columns based on visible index
+                    columns.forEach((column, index) => {
+                        if (index < row.length) {
+                            // Always generate new GUID for key field
+                            if (column.dataField === keyField) {
+                                newRow[column.dataField] = this.generateGuid();
+                            } else {
+                                const value = this.processValueForPaste(row[index], column);
+                                newRow[column.dataField] = value;
+                            }
+
+                            // Debug: Log each mapping
+                            this.debug(`Mapping column ${column.dataField} (index ${index}):`, {
+                                columnField: column.dataField,
+                                dataIndex: index,
+                                rawValue: row[index],
+                                processedValue: newRow[column.dataField]
+                            });
+                        }
+                    });
+
+                    // Debug: Log final mapped row
+                    this.debug('Final mapped row:', newRow);
+
+                    // Insert the row
+                    try {
+                        await store.insert(newRow);
+                    } catch (error) {
+                        this.error('Row insert failed:', error, newRow);
+                    }
+                }
+
+                // Refresh grid
+                this.dataGrid.refresh();
+
+                // Show notification
+                const preview = options.showDataPreviewInOperationInfo ? 
+                    this.createTablePreview(data) : '';
+                this.notify(
+                    this.formatMessage(this.messages.pasted, { rows: data.length }),
+                    preview,
+                    'success',
+                    options
+                );
+
+            } catch (error) {
+                this.error('Paste failed:', error);
+                this.notify(
+                    this.messages.pasteFailed,
+                    '',
+                    'error',
+                    options
+                );
+            }
         }
 
         /**

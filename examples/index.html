@@ -191,6 +191,15 @@
                             ]
                         },
                         location: 'after'
+                    },
+                    {
+                        widget: 'dxButton',
+                        options: {
+                            icon: 'paste',
+                            hint: 'Paste from Clipboard',
+                            onClick: () => clipboard.paste()
+                        },
+                        location: 'after'
                     }
                 ]
             }
