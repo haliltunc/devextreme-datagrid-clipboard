@@ -486,19 +486,29 @@
 
                 const keyField = this.dataGrid.option('keyExpr');
                 const store = this.dataGrid.getDataSource().store();
-                const columns = this.dataGrid.getVisibleColumns()
+                const allColumns = this.dataGrid.getVisibleColumns()
                     .filter(col => !col.command && col.type !== "selection") // Filter out command and selection columns
                     .sort((a, b) => (a.visibleIndex || 0) - (b.visibleIndex || 0)); // Sort by visible index
 
+                // Get visible columns (not hidden)
+                const visibleColumns = allColumns.filter(col => col.visible !== false);
+
                 // Debug: Log column info
-                this.debug('Columns:', columns.map(col => ({
+                this.debug('All Columns:', allColumns.map(col => ({
                     dataField: col.dataField,
                     visibleIndex: col.visibleIndex,
                     caption: col.caption,
+                    visible: col.visible,
                     lookup: col.lookup ? {
                         valueExpr: col.lookup.valueExpr,
                         displayExpr: col.lookup.displayExpr
                     } : undefined
+                })));
+
+                this.debug('Visible Columns:', visibleColumns.map(col => ({
+                    dataField: col.dataField,
+                    visibleIndex: col.visibleIndex,
+                    caption: col.caption
                 })));
 
                 // Process each row
@@ -508,16 +518,16 @@
 
                     const newRow = {};
 
-                    // Map data to columns based on visible index
-                    columns.forEach((column, index) => {
-                        if (index < row.length) {
-                            // Always generate new GUID for key field
-                            if (column.dataField === keyField) {
-                                newRow[column.dataField] = this.generateGuid();
-                            } else {
-                                const value = this.processValueForPaste(row[index], column);
-                                newRow[column.dataField] = value;
-                            }
+                    // Always set key field with GUID
+                    if (keyField) {
+                        newRow[keyField] = this.generateGuid();
+                    }
+
+                    // Map data to visible columns based on visible index
+                    visibleColumns.forEach((column, index) => {
+                        if (index < row.length && column.dataField !== keyField) {
+                            const value = this.processValueForPaste(row[index], column);
+                            newRow[column.dataField] = value;
 
                             // Debug: Log each mapping
                             this.debug(`Mapping column ${column.dataField} (index ${index}):`, {
