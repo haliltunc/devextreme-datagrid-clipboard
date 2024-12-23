@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="styles.css">
     <script src="data.js"></script>
     <!-- <script src="demo.js"></script> -->
-     
+
     <!-- Locales -->
     <script src="locales/tr.js"></script>
 
@@ -137,6 +137,11 @@
                 { dataField: "city", caption: "City", visible: false }
             ],
             allowColumnReordering: true,
+
+            columnChooser: {
+                enabled: true,
+                mode: 'select'
+            },
             selection: {
                 mode: "multiple"
             },
@@ -200,6 +205,17 @@
                             onClick: () => clipboard.paste()
                         },
                         location: 'after'
+                    }, {
+                        widget: 'dxButton',
+                        location: 'after',
+                        options: {
+                            icon: 'columnchooser',
+                            hint: 'Column Chooser',
+                            onClick: function () {
+                                const dataGrid = $("#gridContainer").dxDataGrid('instance');
+                                dataGrid.showColumnChooser();
+                            }
+                        }
                     }
                 ]
             }
