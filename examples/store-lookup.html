@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DevExtreme DataGrid Clipboard - Store Lookup Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- DevExtreme dependencies -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn3.devexpress.com/jslib/23.1.6/js/dx.all.js"></script>
+    <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/23.1.6/css/dx.light.css">
+
+    <!-- Plugin -->
+    <script src="../src/index.js"></script>
+
+    <style>
+        .demo-container {
+            margin: 50px;
+        }
+        .title {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .description {
+            margin-bottom: 30px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1 class="title">Store-based Lookup Example</h1>
+        <p class="description">
+            This example demonstrates how the clipboard plugin handles lookup columns that use DevExtreme Store for data management.
+            You can copy and paste data, reorder columns, and show/hide columns using the column chooser.
+        </p>
+        <div id="gridContainer"></div>
+    </div>
+
+    <script>
+        $(() => {
+            // Status data store
+            const statusStore = new DevExpress.data.ArrayStore({
+                data: [
+                    { id: 1, name: 'Active' },
+                    { id: 2, name: 'On Leave' },
+                    { id: 3, name: 'Terminated' }
+                ],
+                key: 'id'
+            });
+
+            // Grid data
+            const employees = [{
+                id: 1,
+                name: 'John Smith',
+                statusId: 1,
+                age: 30
+            }, {
+                id: 2,
+                name: 'Sarah Johnson',
+                statusId: 2,
+                age: 25
+            }, {
+                id: 3,
+                name: 'Michael Brown',
+                statusId: 1,
+                age: 35
+            }];
+
+            // Initialize DataGrid
+            const grid = $("#gridContainer").dxDataGrid({
+                dataSource: employees,
+                keyExpr: "id",
+                showBorders: true,
+                allowColumnReordering: true,
+                selection: {
+                    mode: "multiple"
+                },
+                columnChooser: {
+                    enabled: true,
+                    mode: 'select'
+                },
+                toolbar: {
+                    items: [{
+                        widget: 'dxButton',
+                        location: 'after',
+                        options: {
+                            icon: 'copy',
+                            hint: 'Copy',
+                            onClick: function() {
+                                clipboard.copy();
+                            }
+                        }
+                    }, {
+                        widget: 'dxButton',
+                        location: 'after',
+                        options: {
+                            icon: 'paste',
+                            hint: 'Paste',
+                            onClick: function() {
+                                clipboard.paste();
+                            }
+                        }
+                    }, {
+                        widget: 'dxButton',
+                        location: 'after',
+                        options: {
+                            icon: 'columnchooser',
+                            hint: 'Column Chooser',
+                            onClick: function() {
+                                grid.showColumnChooser();
+                            }
+                        }
+                    }]
+                },
+                columns: [{
+                    dataField: "id",
+                    caption: "ID"
+                }, {
+                    dataField: "name",
+                    caption: "Full Name"
+                }, {
+                    dataField: "statusId",
+                    caption: "Status",
+                    lookup: {
+                        dataSource: statusStore,
+                        valueExpr: "id",
+                        displayExpr: "name"
+                    }
+                }, {
+                    dataField: "age",
+                    caption: "Age"
+                }]
+            }).dxDataGrid('instance');
+
+            // Initialize clipboard plugin
+            const clipboard = new DataGridClipboard(grid);
+        });
+    </script>
+</body>
+</html>

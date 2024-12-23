@@ -146,7 +146,7 @@
          * Copy data from the grid
          * @param {Object} options - Override default copy options
          */
-        copy(options = {}) {
+        async copy(options = {}) {
             const copyOptions = { ...this.options, ...options };
 
             try {
@@ -155,7 +155,7 @@
                 const rowKeys = this.getRowKeys(copyOptions);
                 if (!rowKeys?.length) return;
 
-                const { rows, columnCount } = this.getRowData(rowKeys, copyOptions);
+                const { rows, columnCount } = await this.getRowData(rowKeys, copyOptions);
                 if (!rows?.length) return;
 
                 const finalText = rows.map(row => row.join('\t')).join('\n');
@@ -205,62 +205,94 @@
         }
 
         /**
+         * Process value for copy operation
+         * @param {*} value - Value to process
+         * @param {Object} column - Column configuration
+         * @returns {Promise<*>} Processed value
+         * @private
+         */
+        async processValue(value, column) {
+            if (value === undefined || value === null) return '';
+
+            // If column has lookup, convert value to display value
+            if (column.lookup) {
+                try {
+                    const dataSource = column.lookup.dataSource;
+                    let items;
+                    
+                    // If dataSource is a store
+                    if (dataSource.store) {
+                        items = await dataSource.store().getAll();
+                    }
+                    // If dataSource is an array
+                    else if (Array.isArray(dataSource)) {
+                        items = dataSource;
+                    }
+                    else {
+                        return value;
+                    }
+
+                    // Find matching item in the items array
+                    const lookupItem = items.find(
+                        item => item[column.lookup.valueExpr] === value
+                    );
+                    return lookupItem ? lookupItem[column.lookup.displayExpr] : value;
+
+                } catch (error) {
+                    this.error('Lookup value processing failed:', error);
+                    return value;
+                }
+            }
+
+            return value;
+        }
+
+        /**
          * Gets row data based on row keys and options
          * @param {Array} rowKeys - Array of row keys
          * @param {Object} options - Copy options
-         * @returns {Object} Object containing rows and column count
+         * @returns {Promise<Object>} Object containing rows and column count
          * @private
          */
-        getRowData(rowKeys, options) {
-            const columns = options.copyMode === 'data' 
+        async getRowData(rowKeys, options) {
+            const columns = (options.copyMode === 'data' 
                 ? this.dataGrid.option('columns')
-                : this.dataGrid.getVisibleColumns();
-
-            // Filter out selection column
-            const filteredColumns = columns.filter(col => !col.command && col.type !== "selection");
+                : this.dataGrid.getVisibleColumns()
+            ).filter(col => !col.command && col.type !== "selection")
+             .sort((a, b) => (a.visibleIndex || 0) - (b.visibleIndex || 0));
 
             const rows = [];
-            const processValue = (value, column) => {
-                if (value === undefined || value === null) return '';
-                
-                if (options.copyMode === 'display' && column.lookup) {
-                    const lookupItem = column.lookup.dataSource.find(
-                        item => item[column.lookup.valueExpr] === value
-                    );
-                    return lookupItem ? lookupItem[column.lookup.displayExpr] : '';
-                }
-                
-                return value;
-            };
 
             if (options.includeHeaders) {
-                const headers = filteredColumns.map(col => 
+                const headers = columns.map(col => 
                     options.copyMode === 'data' ? col.dataField : (col.caption || col.dataField)
                 );
                 if (options.includeRowNumbers) {
-                    headers.unshift(options.rowNumberColumnText);
+                    headers.unshift('#');
                 }
                 rows.push(headers);
             }
 
-            rowKeys.forEach((key, index) => {
+            for (const key of rowKeys) {
                 const rowIndex = this.dataGrid.getRowIndexByKey(key);
                 if (rowIndex >= 0) {
-                    const values = filteredColumns.map(column => 
-                        processValue(this.dataGrid.cellValue(rowIndex, column.dataField), column)
-                    );
-
-                    if (options.includeRowNumbers) {
-                        values.unshift(rowIndex + 1);
+                    const rowValues = [];
+                    for (const column of columns) {
+                        const value = this.dataGrid.cellValue(rowIndex, column.dataField);
+                        const processedValue = await this.processValue(value, column);
+                        rowValues.push(processedValue);
                     }
 
-                    rows.push(values);
+                    if (options.includeRowNumbers) {
+                        rowValues.unshift(rowIndex + 1);
+                    }
+                    rows.push(rowValues);
                 }
-            });
+            }
 
             return {
                 rows,
-                columnCount: filteredColumns.length + (options.includeRowNumbers ? 1 : 0)
+                columnCount: columns.length + (options.includeRowNumbers ? 1 : 0)
             };
         }
 
@@ -449,18 +481,40 @@
          * Process value for paste operation
          * @param {*} value - Value to process
          * @param {Object} column - Column configuration
-         * @returns {*} Processed value
+         * @returns {Promise<*>} Processed value
          * @private
          */
-        processValueForPaste(value, column) {
+        async processValueForPaste(value, column) {
             if (value === undefined || value === null || value === '') return '';
 
             // If column has lookup, convert display value to actual value
             if (column.lookup) {
-                const lookupItem = column.lookup.dataSource.find(
-                    item => String(item[column.lookup.displayExpr]).toLowerCase() === String(value).toLowerCase()
-                );
-                return lookupItem ? lookupItem[column.lookup.valueExpr] : value;
+                try {
+                    const dataSource = column.lookup.dataSource;
+                    let items;
+                    
+                    // If dataSource is a store
+                    if (dataSource.store) {
+                        items = await dataSource.store().getAll();
+                    }
+                    // If dataSource is an array
+                    else if (Array.isArray(dataSource)) {
+                        items = dataSource;
+                    }
+                    else {
+                        return value;
+                    }
+
+                    // Find matching item in the items array
+                    const lookupItem = items.find(
+                        item => String(item[column.lookup.displayExpr]).toLowerCase() === String(value).toLowerCase()
+                    );
+                    return lookupItem ? lookupItem[column.lookup.valueExpr] : value;
+
+                } catch (error) {
+                    this.error('Lookup value processing failed:', error);
+                    return value;
+                }
             }
 
             return value;
@@ -487,10 +541,9 @@
                 const keyField = this.dataGrid.option('keyExpr');
                 const store = this.dataGrid.getDataSource().store();
                 const allColumns = this.dataGrid.getVisibleColumns()
-                    .filter(col => !col.command && col.type !== "selection") // Filter out command and selection columns
-                    .sort((a, b) => (a.visibleIndex || 0) - (b.visibleIndex || 0)); // Sort by visible index
+                    .filter(col => !col.command && col.type !== "selection")
+                    .sort((a, b) => (a.visibleIndex || 0) - (b.visibleIndex || 0));
 
-                // Get visible columns (not hidden)
                 const visibleColumns = allColumns.filter(col => col.visible !== false);
 
                 // Debug: Log column info
@@ -501,19 +554,13 @@
                     visible: col.visible,
                     lookup: col.lookup ? {
                         valueExpr: col.lookup.valueExpr,
-                        displayExpr: col.lookup.displayExpr
+                        displayExpr: col.lookup.displayExpr,
+                        dataSource: col.lookup.dataSource ? 'present' : 'none'
                     } : undefined
-                })));
-
-                this.debug('Visible Columns:', visibleColumns.map(col => ({
-                    dataField: col.dataField,
-                    visibleIndex: col.visibleIndex,
-                    caption: col.caption
                 })));
 
                 // Process each row
                 for (const row of data) {
-                    // Debug: Log current row data
                     this.debug('Processing row:', row);
 
                     const newRow = {};
@@ -523,26 +570,32 @@
                         newRow[keyField] = this.generateGuid();
                     }
 
-                    // Map data to visible columns based on visible index
-                    visibleColumns.forEach((column, index) => {
+                    // Process all columns first to handle async lookup operations
+                    const processPromises = visibleColumns.map(async (column, index) => {
                         if (index < row.length && column.dataField !== keyField) {
-                            const value = this.processValueForPaste(row[index], column);
-                            newRow[column.dataField] = value;
+                            const value = await this.processValueForPaste(row[index], column);
+                            return { column, value };
+                        }
+                        return null;
+                    });
 
-                            // Debug: Log each mapping
-                            this.debug(`Mapping column ${column.dataField} (index ${index}):`, {
-                                columnField: column.dataField,
-                                dataIndex: index,
-                                rawValue: row[index],
-                                processedValue: newRow[column.dataField]
+                    // Wait for all lookup operations to complete
+                    const results = await Promise.all(processPromises);
+
+                    // Apply the processed values
+                    results.forEach(result => {
+                        if (result) {
+                            newRow[result.column.dataField] = result.value;
+                            this.debug(`Mapping column ${result.column.dataField}:`, {
+                                columnField: result.column.dataField,
+                                rawValue: row[visibleColumns.indexOf(result.column)],
+                                processedValue: result.value
                             });
                         }
                     });
 
-                    // Debug: Log final mapped row
                     this.debug('Final mapped row:', newRow);
 
-                    // Insert the row
                     try {
                         await store.insert(newRow);
                     } catch (error) {
@@ -553,7 +606,6 @@
                 // Refresh grid
                 this.dataGrid.refresh();
 
-                // Show notification
                 const preview = options.showDataPreviewInOperationInfo ? 
                     this.createTablePreview(data) : '';
                 this.notify(
