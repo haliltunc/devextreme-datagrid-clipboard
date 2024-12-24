@@ -51,7 +51,7 @@
         constructor(dataGrid, options = {}) {
             this.dataGrid = dataGrid;
             this.options = {
-                copyMode: 'display',
+                copyMode: 'display', // 'display' or 'data'
                 includeHeaders: false,
                 debug: false,
                 copyAllRows: false,
@@ -223,8 +223,8 @@
         async processValue(value, column) {
             if (value === undefined || value === null) return '';
 
-            // If column has lookup, convert value to display value
-            if (column.lookup) {
+            // If column has lookup and copyMode is display, convert value to display value
+            if (column.lookup && this.options.copyMode === 'display') {
                 try {
                     const dataSource = column.lookup.dataSource;
                     let items;
@@ -496,8 +496,8 @@
         async processValueForPaste(value, column) {
             if (value === undefined || value === null || value === '') return '';
 
-            // If column has lookup, convert display value to actual value
-            if (column.lookup) {
+            // If column has lookup and copyMode is display, convert display value to actual value
+            if (column.lookup && this.options.copyMode === 'display') {
                 try {
                     const dataSource = column.lookup.dataSource;
                     let items;
@@ -524,6 +524,9 @@
                     this.error('Lookup value processing failed:', error);
                     return value;
                 }
+            } else if (column.lookup && this.options.copyMode === 'data') {
+                // If copyMode is data and value is numeric, convert to number
+                return !isNaN(value) ? Number(value) : value;
             }
 
             return value;
