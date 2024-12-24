@@ -63,6 +63,9 @@
                 ...options
             };
 
+            // Initialize styles
+            this.initializeStyles();
+
             // Get messages for current language
             this.messages = this.getMessages(this.options.language);
 
@@ -80,6 +83,80 @@
 
             this.debug('Plugin initialized with options:', this.options);
             this.init();
+        }
+
+        /**
+         * Initialize plugin styles
+         * @private
+         */
+        initializeStyles() {
+            const styleId = 'dx-datagrid-clipboard-styles';
+            
+            // Remove existing styles if any
+            const existingStyles = document.getElementById(styleId);
+            if (existingStyles) {
+                existingStyles.remove();
+            }
+
+            // Create and append styles
+            const style = document.createElement('style');
+            style.id = styleId;
+            style.textContent = `
+                /* Common Table Styles */
+                .preview-table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    border-radius: 4px;
+                    overflow: hidden;
+                    margin-bottom: 4px;
+                    border-style: solid;
+                    border-width: 1px;
+                }
+
+                .preview-table th,
+                .preview-table td {
+                    padding: 8px;
+                    font-size: 13px;
+                    border-style: solid;
+                    border-width: 1px;
+                }
+
+                .preview-table th {
+                    font-weight: 500;
+                    text-align: left;
+                }
+
+                /* Toast Table Overrides */
+                .dx-clipboard-toast .preview-table {
+                    width: max-content;
+                    min-width: 100%;
+                }
+
+                .dx-clipboard-toast .preview-table th,
+                .dx-clipboard-toast .preview-table td {
+                    padding: 4px 8px;
+                    font-size: 12px;
+                }
+
+                /* Toast Layout */
+                .dx-clipboard-toast .dx-toast-icon {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 20px;
+                    height: 20px;
+                    margin-right: 8px;
+                }
+
+                .dx-clipboard-toast .dx-overlay-content {
+                    font-family: monospace;
+                    white-space: pre;
+                    padding: 15px;
+                    border-radius: 4px;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                }
+            `;
+            document.head.appendChild(style);
         }
 
         /**
