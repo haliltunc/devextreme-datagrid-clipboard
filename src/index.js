@@ -1,3 +1,12 @@
+/**
+ * DevExtreme DataGrid Clipboard Plugin
+ * Enhanced copy/paste functionality for DevExtreme DataGrid
+ * 
+ * @author Halil Tunc <halil@haliltunc.com>
+ * @website https://haliltunc.com
+ * @license MIT
+ */
+
 ;(function(window) {
     // Default English messages
     const defaultMessages = {

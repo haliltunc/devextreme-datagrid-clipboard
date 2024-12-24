@@ -1,24 +1,36 @@
 {
   "name": "devextreme-datagrid-clipboard",
   "version": "1.0.0",
-  "description": "A powerful clipboard plugin for DevExtreme DataGrid that enhances data manipulation capabilities",
-  "main": "src/index.js",
+  "description": "Clipboard plugin for DevExtreme DataGrid with advanced copy/paste functionality",
+  "main": "dist/dx-datagrid-clipboard.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "http-server . -p 8081"
-  },
-  "dependencies": {
-    "http-server": "^14.1.1"
+    "build": "webpack --mode production",
+    "start": "http-server . -p 8081",
+    "prepare": "npm run build"
   },
   "keywords": [
     "devextreme",
     "datagrid",
     "clipboard",
     "copy",
-    "paste",
-    "data-manipulation",
-    "grid"
+    "paste"
   ],
-  "author": "",
-  "license": "MIT"
+  "author": {
+    "name": "Halil Tunc",
+    "email": "halil@haliltunc.com",
+    "url": "https://haliltunc.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/haliltunc/devextreme-datagrid-clipboard.git"
+  },
+  "peerDependencies": {
+    "devextreme": ">=21.1.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.0.0",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^4.10.0"
+  }
 }
