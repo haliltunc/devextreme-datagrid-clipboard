@@ -55,9 +55,17 @@ Check out the examples directory for various implementation scenarios:
 - `copy()`: Copy selected rows to clipboard
 - `paste()`: Paste clipboard data to grid
 
+## Documentation
+
+For detailed usage instructions and examples, please refer to the [examples](examples) directory.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a list of changes and version history.
+
 ## License
 
-MIT License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Author
 

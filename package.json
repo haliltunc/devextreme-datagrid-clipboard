@@ -1,6 +1,6 @@
 {
   "name": "devextreme-datagrid-clipboard",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Clipboard plugin for DevExtreme DataGrid with advanced copy/paste functionality",
   "main": "dist/dx-datagrid-clipboard.js",
   "scripts": {
