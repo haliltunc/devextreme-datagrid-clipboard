@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevExtreme DataGrid Clipboard - Documentation</title>
+    
+    <!-- DevExtreme dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/23.1.6/css/dx.light.css">
+    <script src="https://cdn3.devexpress.com/jslib/23.1.6/js/dx.all.js"></script>
+    
+    <!-- Site files -->
+    <link rel="stylesheet" href="assets/css/styles.css">
+
+    <style>
+        /* Documentation specific styles */
+        .doc-section {
+            margin-bottom: 40px;
+        }
+
+        .doc-section h2 {
+            font-size: 24px;
+            margin: 0 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .doc-section h3 {
+            font-size: 20px;
+            margin: 30px 0 15px;
+        }
+
+        .doc-section p {
+            margin: 0 0 15px;
+            line-height: 1.6;
+        }
+
+        .doc-section ul {
+            margin: 0 0 15px;
+            padding-left: 20px;
+        }
+
+        .doc-section li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .doc-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .doc-table th,
+        .doc-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .doc-table th {
+            background: var(--background-color);
+            font-weight: 600;
+        }
+
+        .doc-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .doc-table td:first-child {
+            font-family: monospace;
+            color: var(--primary-color);
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-family: monospace;
+            line-height: 1.4;
+            overflow-x: auto;
+        }
+
+        .type-label {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--background-color);
+            color: #666;
+            margin-left: 8px;
+        }
+
+        .method-signature {
+            font-family: monospace;
+            background: var(--background-color);
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-text">DevExtreme DataGrid Clipboard</span>
+                <span class="version">v1.1.0</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="examples.html" class="nav-link">Examples</a>
+                <a href="documentation.html" class="nav-link active">Documentation</a>
+                <a href="https://github.com/haliltunc/devextreme-datagrid-clipboard" class="nav-link" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-container">
+            <h1>Documentation</h1>
+            <p class="lead">
+                Complete documentation for the DevExtreme DataGrid Clipboard plugin.
+            </p>
+
+            <!-- Installation -->
+            <section class="doc-section">
+                <h2>Installation</h2>
+                <p>Install the plugin using npm:</p>
+                <div class="code-block">npm install devextreme-datagrid-clipboard</div>
+
+                <p>Or include it directly in your HTML:</p>
+                <div class="code-block">&lt;script src="path/to/dx-datagrid-clipboard.js"&gt;&lt;/script&gt;</div>
+            </section>
+
+            <!-- Basic Usage -->
+            <section class="doc-section">
+                <h2>Basic Usage</h2>
+                <p>Initialize the plugin with a DataGrid instance:</p>
+                <div class="code-block">
+const grid = $("#gridContainer").dxDataGrid({
+    // grid configuration
+}).dxDataGrid("instance");
+
+const clipboard = new DataGridClipboard(grid, {
+    showOperationInfo: true
+});</div>
+            </section>
+
+            <!-- Configuration -->
+            <section class="doc-section">
+                <h2>Configuration</h2>
+                <p>Available configuration options:</p>
+                <div class="configuration-grid">
+                    <!-- Copy Mode -->
+                    <div class="config-item">
+                        <div class="config-name">
+                            <a href="#copyMode" class="config-link">copyMode</a>
+                        </div>
+                        <div class="config-type">string</div>
+                        <div class="config-default">"display"</div>
+                        <div class="config-description">Copy mode: "display" for formatted values, "data" for raw values</div>
+                    </div>
+
+                    <!-- Include Headers -->
+                    <div class="config-item">
+                        <div class="config-name">
+                            <a href="#includeHeaders" class="config-link">includeHeaders</a>
+                        </div>
+                        <div class="config-type">boolean</div>
+                        <div class="config-default">false</div>
+                        <div class="config-description">Include column headers in copied data</div>
+                    </div>
+
+                    <!-- Copy All Rows -->
+                    <div class="config-item">
+                        <div class="config-name">
+                            <a href="#copyAllRows" class="config-link">copyAllRows</a>
+                        </div>
+                        <div class="config-type">boolean</div>
+                        <div class="config-default">false</div>
+                        <div class="config-description">Copy all rows instead of selected rows</div>
+                    </div>
+
+                    <!-- Include Row Numbers -->
+                    <div class="config-item">
+                        <div class="config-name">
+                            <a href="#includeRowNumbers" class="config-link">includeRowNumbers</a>
+                        </div>
+                        <div class="config-type">boolean</div>
+                        <div class="config-default">false</div>
+                        <div class="config-description">Add sequence numbers to copied data</div>
+                    </div>
+
+                    <!-- Row Number Column Text -->
+                    <div class="config-item">
+                        <div class="config-name">
+                            <a href="#rowNumberColumnText" class="config-link">rowNumberColumnText</a>
+                        </div>
+                        <div class="config-type">string</div>
+                        <div class="config-default">"#"</div>
+                        <div class="config-description">Header text for row number column</div>
+                    </div>
+
+                    <!-- Show Operation Info -->
+                    <div class="config-item">
+                        <div class="config-name">
+                            <a href="#showOperationInfo" class="config-link">showOperationInfo</a>
+                        </div>
+                        <div class="config-type">boolean</div>
+                        <div class="config-default">true</div>
+                        <div class="config-description">Show notifications for copy/paste operations</div>
+                    </div>
+
+                    <!-- Show Data Preview -->
+                    <div class="config-item">
+                        <div class="config-name">
+                            <a href="#showDataPreviewInOperationInfo" class="config-link">showDataPreviewInOperationInfo</a>
+                        </div>
+                        <div class="config-type">boolean</div>
+                        <div class="config-default">true</div>
+                        <div class="config-description">Show data preview in notifications</div>
+                    </div>
+
+                    <!-- Debug -->
+                    <div class="config-item">
+                        <div class="config-name">
+                            <a href="#debug" class="config-link">debug</a>
+                        </div>
+                        <div class="config-type">boolean</div>
+                        <div class="config-default">false</div>
+                        <div class="config-description">Enable debug mode for detailed logging</div>
+                    </div>
+
+                    <!-- Logger -->
+                    <div class="config-item">
+                        <div class="config-name">
+                            <a href="#logger" class="config-link">logger</a>
+                        </div>
+                        <div class="config-type">function</div>
+                        <div class="config-default">console.log</div>
+                        <div class="config-description">Custom logger function for debug mode</div>
+                    </div>
+
+                    <!-- Language -->
+                    <div class="config-item">
+                        <div class="config-name">
+                            <a href="#language" class="config-link">language</a>
+                        </div>
+                        <div class="config-type">string</div>
+                        <div class="config-default">"en"</div>
+                        <div class="config-description">Language for notifications (en, tr)</div>
+                    </div>
+
+                    <!-- Messages -->
+                    <div class="config-item">
+                        <div class="config-name">
+                            <a href="#messages" class="config-link">messages</a>
+                        </div>
+                        <div class="config-type">object</div>
+                        <div class="config-default">{}</div>
+                        <div class="config-description">Custom messages for notifications</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Detailed Sections -->
+            <section class="doc-section">
+                <h2>Details</h2>
+
+                <!-- Copy Mode -->
+                <div id="copyMode" class="detail-section">
+                    <h3>copyMode</h3>
+                    <p>Copy mode: "display" for formatted values, "data" for raw values</p>
+                </div>
+
+                <!-- Include Headers -->
+                <div id="includeHeaders" class="detail-section">
+                    <h3>includeHeaders</h3>
+                    <p>Include column headers in copied data</p>
+                </div>
+
+                <!-- Copy All Rows -->
+                <div id="copyAllRows" class="detail-section">
+                    <h3>copyAllRows</h3>
+                    <p>Copy all rows instead of selected rows</p>
+                </div>
+
+                <!-- Include Row Numbers -->
+                <div id="includeRowNumbers" class="detail-section">
+                    <h3>includeRowNumbers</h3>
+                    <p>Add sequence numbers to copied data</p>
+                </div>
+
+                <!-- Row Number Column Text -->
+                <div id="rowNumberColumnText" class="detail-section">
+                    <h3>rowNumberColumnText</h3>
+                    <p>Header text for row number column</p>
+                </div>
+
+                <!-- Show Operation Info -->
+                <div id="showOperationInfo" class="detail-section">
+                    <h3>showOperationInfo</h3>
+                    <p>Show notifications for copy/paste operations</p>
+                </div>
+
+                <!-- Show Data Preview -->
+                <div id="showDataPreviewInOperationInfo" class="detail-section">
+                    <h3>showDataPreviewInOperationInfo</h3>
+                    <p>Show data preview in notifications</p>
+                </div>
+
+                <!-- Debug -->
+                <div id="debug" class="detail-section">
+                    <h3>debug</h3>
+                    <p>Enable debug mode for detailed logging</p>
+                </div>
+
+                <!-- Logger -->
+                <div id="logger" class="detail-section">
+                    <h3>logger</h3>
+                    <p>Custom logger function for debug mode</p>
+                </div>
+
+                <!-- Language -->
+                <div id="language" class="detail-section">
+                    <h3>language</h3>
+                    <p>Language for notifications (en, tr)</p>
+                </div>
+
+                <!-- Messages -->
+                <div id="messages" class="detail-section">
+                    <h3>messages</h3>
+                    <p>Custom messages for notifications</p>
+                </div>
+            </section>
+
+            <!-- Methods -->
+            <section class="doc-section">
+                <h2>Methods</h2>
+                
+                <h3>copy(options)</h3>
+                <p>Copy selected or all rows to clipboard.</p>
+                <div class="method-signature">clipboard.copy(options?: CopyOptions): void</div>
+                <p>Options:</p>
+                <ul>
+                    <li>copyMode: "display" | "data"</li>
+                    <li>includeHeaders: boolean</li>
+                    <li>copyAllRows: boolean</li>
+                    <li>includeRowNumbers: boolean</li>
+                    <li>rowNumberColumnText: string</li>
+                </ul>
+
+                <h3>copyRows(rowIndexes)</h3>
+                <p>Copy specific rows by their indexes.</p>
+                <div class="method-signature">clipboard.copyRows(rowIndexes: number[]): void</div>
+
+                <h3>copyRowsByKey(keys)</h3>
+                <p>Copy specific rows by their key values.</p>
+                <div class="method-signature">clipboard.copyRowsByKey(keys: any[]): void</div>
+
+                <h3>paste()</h3>
+                <p>Paste data from clipboard.</p>
+                <div class="method-signature">clipboard.paste(): void</div>
+
+                <h3>setLanguage(lang)</h3>
+                <p>Change the language for notifications.</p>
+                <div class="method-signature">clipboard.setLanguage(lang: string): void</div>
+
+                <h3>setMessages(messages)</h3>
+                <p>Set custom messages for notifications.</p>
+                <div class="method-signature">clipboard.setMessages(messages: object): void</div>
+
+                <h3>destroy()</h3>
+                <p>Destroy the clipboard instance and clean up resources.</p>
+                <div class="method-signature">clipboard.destroy(): void</div>
+            </section>
+
+            <!-- Events -->
+            <section class="doc-section">
+                <h2>Events</h2>
+                <table class="doc-table">
+                    <thead>
+                        <tr>
+                            <th>Event</th>
+                            <th>Parameters</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>onCopy</td>
+                            <td>data: string</td>
+                            <td>Fired when data is copied to clipboard</td>
+                        </tr>
+                        <tr>
+                            <td>onPaste</td>
+                            <td>data: string</td>
+                            <td>Fired when data is pasted from clipboard</td>
+                        </tr>
+                        <tr>
+                            <td>onError</td>
+                            <td>error: Error</td>
+                            <td>Fired when an error occurs during copy/paste</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Browser Support -->
+            <section class="doc-section">
+                <h2>Browser Support</h2>
+                <p>The plugin supports all modern browsers that implement the Clipboard API:</p>
+                <ul>
+                    <li>Chrome 42+</li>
+                    <li>Firefox 41+</li>
+                    <li>Safari 10+</li>
+                    <li>Edge 12+</li>
+                    <li>Opera 29+</li>
+                </ul>
+            </section>
+
+            <!-- License -->
+            <section class="doc-section">
+                <h2>License</h2>
+                <p>This project is licensed under the MIT License. See the LICENSE file for details.</p>
+            </section>
+        </div>
+    </main>
+</body>
+</html>

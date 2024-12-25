@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Localization - DevExtreme DataGrid Clipboard</title>
+    
+    <!-- DevExtreme dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/23.1.6/css/dx.light.css">
+    <script src="https://cdn3.devexpress.com/jslib/23.1.6/js/dx.all.js"></script>
+    
+    <!-- Plugin -->
+    <script src="../../../src/index.js"></script>
+    
+    <!-- Site files -->
+    <link rel="stylesheet" href="../../assets/css/styles.css">
+    <script src="../../assets/js/data.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-text">DataGrid Clipboard</span>
+                <span class="version">v1.1.0</span>
+            </div>
+            <div class="nav-links">
+                <a href="../../index.html" class="nav-link">Home</a>
+                <a href="../../examples.html" class="nav-link active">Examples</a>
+                <a href="../../documentation.html" class="nav-link">Documentation</a>
+                <a href="https://github.com/codeium/devextreme-datagrid-clipboard" class="nav-link" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-container">
+            <h1>Localization Example</h1>
+            <p class="lead">
+                Customize messages and add support for different languages.
+            </p>
+
+            <div class="demo-container">
+                <!-- Grid Container -->
+                <div class="grid-container">
+                    <div id="gridContainer"></div>
+                </div>
+
+                <!-- Options Container -->
+                <div class="options-container">
+                    <div class="options-title">Options</div>
+                    <div class="options-grid">
+                        <!-- Language -->
+                        <div class="option-group">
+                            <div class="option-info">
+                                <div class="option-label">locale</div>
+                                <div class="option-description">Change notification language</div>
+                            </div>
+                            <div class="option-control">
+                                <div id="languageSelector"></div>
+                            </div>
+                        </div>
+
+                        <!-- Operation Info -->
+                        <div class="option-group">
+                            <div class="option-info">
+                                <div class="option-label">showOperationInfo</div>
+                                <div class="option-description">Display notifications for operations</div>
+                            </div>
+                            <div class="option-control">
+                                <div id="showOperationInfoCheckbox"></div>
+                            </div>
+                        </div>
+
+                        <!-- Preview -->
+                        <div class="option-group">
+                            <div class="option-info">
+                                <div class="option-label">showDataPreviewInOperationInfo</div>
+                                <div class="option-description">Preview data before copying</div>
+                            </div>
+                            <div class="option-control">
+                                <div id="showDataPreviewCheckbox"></div>
+                            </div>
+                        </div>
+
+                        <!-- Copy Actions -->
+                        <div class="option-group">
+                            <div class="option-info">
+                                <div class="option-label">Copy Actions</div>
+                                <div class="option-description">Different ways to copy data</div>
+                            </div>
+                            <div class="option-control">
+                                <div id="copyActionsMenu"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Messages -->
+                    <div style="margin-top: 20px;">
+                        <div class="options-title">Custom Messages</div>
+                        <div class="options-grid">
+                            <div class="option-group">
+                                <div class="option-info">
+                                    <div class="option-label">Copy Success</div>
+                                    <div class="option-description">Message shown after successful copy</div>
+                                </div>
+                                <div class="option-control">
+                                    <div id="copySuccessMessage"></div>
+                                </div>
+                            </div>
+                            <div class="option-group">
+                                <div class="option-info">
+                                    <div class="option-label">Copy Error</div>
+                                    <div class="option-description">Message shown when copy fails</div>
+                                </div>
+                                <div class="option-control">
+                                    <div id="copyErrorMessage"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        $(() => {
+            // Custom messages for different languages
+            const messages = {
+                en: {
+                    copySuccess: "Data copied to clipboard",
+                    copyError: "Failed to copy data",
+                    pasteSuccess: "Data pasted successfully",
+                    pasteError: "Failed to paste data",
+                    noSelection: "Please select rows to copy",
+                    preview: "Preview",
+                    close: "Close"
+                },
+                tr: {
+                    copySuccess: "Veriler panoya kopyalandı",
+                    copyError: "Veriler kopyalanamadı",
+                    pasteSuccess: "Veriler başarıyla yapıştırıldı",
+                    pasteError: "Veriler yapıştırılamadı",
+                    noSelection: "Lütfen kopyalanacak satırları seçin",
+                    preview: "Önizleme",
+                    close: "Kapat"
+                }
+            };
+
+            // Initialize demo grid
+            const grid = $("#gridContainer").dxDataGrid({
+                dataSource: employees,
+                keyExpr: "id",
+                columns: [{
+                    dataField: "id",
+                    caption: "ID",
+                    width: 70
+                }, {
+                    dataField: "firstName",
+                    caption: "First Name"
+                }, {
+                    dataField: "lastName",
+                    caption: "Last Name"
+                }, {
+                    dataField: "position",
+                    caption: "Position"
+                }, {
+                    dataField: "department",
+                    caption: "Department"
+                }],
+                selection: {
+                    mode: "multiple"
+                }
+            }).dxDataGrid("instance");
+
+            // Initialize language selector
+            const languageSelector = $("#languageSelector").dxSelectBox({
+                items: [
+                    { text: "English", value: "en" },
+                    { text: "Türkçe", value: "tr" }
+                ],
+                displayExpr: "text",
+                valueExpr: "value",
+                value: "en",
+                onValueChanged: (e) => {
+                    if (clipboard) {
+                        clipboard.setLanguage(e.value);
+                        updateCustomMessages(e.value);
+                    }
+                }
+            }).dxSelectBox("instance");
+
+            // Initialize show operation info checkbox
+            const showOperationInfoCheckbox = $("#showOperationInfoCheckbox").dxCheckBox({
+                value: true,
+                onValueChanged: () => initializeClipboard()
+            }).dxCheckBox("instance");
+
+            // Initialize show data preview checkbox
+            const showDataPreviewCheckbox = $("#showDataPreviewCheckbox").dxCheckBox({
+                value: true,
+                onValueChanged: () => initializeClipboard()
+            }).dxCheckBox("instance");
+
+            // Initialize copy actions menu
+            const copyActionsMenu = $("#copyActionsMenu").dxDropDownButton({
+                text: "Copy Options",
+                icon: "copy",
+                dropDownOptions: {
+                    width: 300
+                },
+                items: [{
+                    text: "Copy Selected",
+                    icon: "copy",
+                    onClick: () => clipboard.copy()
+                }, {
+                    text: "Copy All",
+                    icon: "copy",
+                    onClick: () => clipboard.copy({ copyAllRows: true })
+                }, {
+                    text: "Copy with Headers",
+                    icon: "copy",
+                    onClick: () => clipboard.copy({ includeHeaders: true })
+                }]
+            }).dxDropDownButton("instance");
+
+            // Initialize custom message inputs
+            const copySuccessMessage = $("#copySuccessMessage").dxTextBox({
+                value: messages.en.copySuccess,
+                onValueChanged: () => updateMessages()
+            }).dxTextBox("instance");
+
+            const copyErrorMessage = $("#copyErrorMessage").dxTextBox({
+                value: messages.en.copyError,
+                onValueChanged: () => updateMessages()
+            }).dxTextBox("instance");
+
+            function updateCustomMessages(lang) {
+                copySuccessMessage.option("value", messages[lang].copySuccess);
+                copyErrorMessage.option("value", messages[lang].copyError);
+            }
+
+            function updateMessages() {
+                if (clipboard) {
+                    clipboard.setMessages({
+                        copySuccess: copySuccessMessage.option("value"),
+                        copyError: copyErrorMessage.option("value")
+                    });
+                }
+            }
+
+            // Initialize copy-paste plugin
+            let clipboard;
+
+            function initializeClipboard() {
+                // Destroy existing instance if any
+                if (clipboard) {
+                    clipboard.destroy();
+                }
+
+                const lang = languageSelector.option("value");
+
+                // Create new instance
+                clipboard = new DataGridClipboard(grid, {
+                    showOperationInfo: showOperationInfoCheckbox.option("value"),
+                    showDataPreviewInOperationInfo: showDataPreviewCheckbox.option("value"),
+                    language: lang,
+                    messages: {
+                        ...messages[lang],
+                        copySuccess: copySuccessMessage.option("value"),
+                        copyError: copyErrorMessage.option("value")
+                    }
+                });
+            }
+
+            // Initial plugin initialization
+            initializeClipboard();
+        });
+    </script>
+</body>
+</html>

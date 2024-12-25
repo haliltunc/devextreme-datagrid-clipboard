@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiple Selection - DevExtreme DataGrid Clipboard</title>
+    
+    <!-- DevExtreme dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/23.1.6/css/dx.light.css">
+    <script src="https://cdn3.devexpress.com/jslib/23.1.6/js/dx.all.js"></script>
+    
+    <!-- Plugin -->
+    <script src="../../../src/index.js"></script>
+    
+    <!-- Site files -->
+    <link rel="stylesheet" href="../../assets/css/styles.css">
+    <script src="../../assets/js/data.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="../../index.html">DevExtreme DataGrid Clipboard</a>
+            </div>
+            <div class="nav-links">
+                <a href="../../index.html">Home</a>
+                <a href="../../documentation.html">Documentation</a>
+                <a href="../../examples.html">Examples</a>
+                <a href="https://github.com/haliltunc/devextreme-datagrid-clipboard" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-container">
+            <h1>Multiple Selection Example</h1>
+            <p class="lead">
+                Copy specific rows using row indexes or keys, ideal for selective data export.
+            </p>
+
+            <div class="demo-container">
+                <!-- Grid Container -->
+                <div class="grid-container">
+                    <div id="gridContainer"></div>
+                </div>
+
+                <!-- Options Container -->
+                <div class="options-container">
+                    <div class="options-title">Copy Options</div>
+                    <div class="options-grid">
+                        <!-- Copy Mode -->
+                        <div class="option-group">
+                            <div class="option-info">
+                                <div class="option-label">
+                                    <a href="../../documentation.html#copyMode" class="option-link">copyMode</a>
+                                </div>
+                            </div>
+                            <div class="option-control">
+                                <div id="copyModeSelector"></div>
+                            </div>
+                        </div>
+
+                        <!-- Copy All Rows -->
+                        <div class="option-group">
+                            <div class="option-info">
+                                <div class="option-label">
+                                    <a href="../../documentation.html#copyAllRows" class="option-link">copyAllRows</a>
+                                </div>
+                            </div>
+                            <div class="option-control">
+                                <div id="copyAllRowsCheckbox"></div>
+                            </div>
+                        </div>
+
+                        <!-- Operation Info -->
+                        <div class="option-group">
+                            <div class="option-info">
+                                <div class="option-label">
+                                    <a href="../../documentation.html#showOperationInfo" class="option-link">showOperationInfo</a>
+                                </div>
+                            </div>
+                            <div class="option-control">
+                                <div id="showOperationInfoCheckbox"></div>
+                            </div>
+                        </div>
+
+                        <!-- Preview -->
+                        <div class="option-group">
+                            <div class="option-info">
+                                <div class="option-label">
+                                    <a href="../../documentation.html#showDataPreviewInOperationInfo" class="option-link">showDataPreviewInOperationInfo</a>
+                                </div>
+                            </div>
+                            <div class="option-control">
+                                <div id="showDataPreviewCheckbox"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        $(() => {
+            // Initialize demo grid
+            const grid = $("#gridContainer").dxDataGrid({
+                dataSource: employees,
+                keyExpr: "id",
+                columns: [{
+                    dataField: "id",
+                    caption: "ID",
+                    width: 70
+                }, {
+                    dataField: "firstName",
+                    caption: "First Name"
+                }, {
+                    dataField: "lastName",
+                    caption: "Last Name"
+                }, {
+                    dataField: "position",
+                    caption: "Position"
+                }, {
+                    dataField: "department",
+                    caption: "Department"
+                }],
+                selection: {
+                    mode: "multiple"
+                }
+            }).dxDataGrid("instance");
+
+            // Initialize copy mode selector
+            const copyModeSelector = $("#copyModeSelector").dxSelectBox({
+                items: [
+                    { text: "Multiple Rows", value: "multiple" },
+                    { text: "Single Row", value: "single" }
+                ],
+                displayExpr: "text",
+                valueExpr: "value",
+                value: "multiple",
+                onValueChanged: (e) => {
+                    grid.option("selection.mode", e.value);
+                }
+            }).dxSelectBox("instance");
+
+            // Initialize copy actions menu
+            const copyActionsMenu = $("#copyActionsMenu").dxDropDownButton({
+                text: "Copy Options",
+                icon: "copy",
+                dropDownOptions: {
+                    width: 300
+                },
+                items: [{
+                    text: "Copy Selected",
+                    icon: "copy",
+                    onClick: () => clipboard.copy()
+                }, {
+                    text: "Copy All Rows",
+                    icon: "copy",
+                    onClick: () => clipboard.copy({ copyAllRows: true })
+                }, {
+                    text: "Copy First & Last Rows",
+                    icon: "copy",
+                    onClick: () => clipboard.copyRows([0, employees.length - 1])
+                }, {
+                    text: "Copy by ID (1 & 3)",
+                    icon: "copy",
+                    onClick: () => clipboard.copyRowsByKey([1, 3])
+                }]
+            }).dxDropDownButton("instance");
+
+            // Initialize headers checkbox
+            const includeHeadersCheckbox = $("#includeHeadersCheckbox").dxCheckBox({
+                value: true,
+                onValueChanged: () => initializeClipboard()
+            }).dxCheckBox("instance");
+
+            // Initialize show operation info checkbox
+            const showOperationInfoCheckbox = $("#showOperationInfoCheckbox").dxCheckBox({
+                value: true,
+                onValueChanged: () => initializeClipboard()
+            }).dxCheckBox("instance");
+
+            // Initialize copy-paste plugin
+            let clipboard;
+
+            function initializeClipboard() {
+                // Destroy existing instance if any
+                if (clipboard) {
+                    clipboard.destroy();
+                }
+
+                // Create new instance
+                clipboard = new DataGridClipboard(grid, {
+                    includeHeaders: includeHeadersCheckbox.option("value"),
+                    showOperationInfo: showOperationInfoCheckbox.option("value")
+                });
+            }
+
+            // Initial plugin initialization
+            initializeClipboard();
+        });
+    </script>
+</body>
+</html>

@@ -28,7 +28,7 @@ const grid = $("#gridContainer").dxDataGrid({
 
 // Initialize the clipboard plugin
 const clipboard = new DataGridClipboard(grid, {
-    debug: false // Set to true for debugging
+    // plugin configurations
 });
 ```
 
@@ -46,7 +46,14 @@ Check out the examples directory for various implementation scenarios:
 
 ```javascript
 {
-    debug: boolean // Enable/disable debug logging
+    copyMode: string,                 // 'selection' | 'all' - Copy mode
+    includeHeaders: boolean,          // Include column headers in copied data
+    copyAllRows: boolean,             // Copy all rows instead of selected
+    includeRowNumbers: boolean,       // Include row numbers in copied data
+    rowNumberColumnText: string,      // Text for row number column header
+    showOperationInfo: boolean,       // Show operation info in toast
+    showDataPreviewInOperationInfo: boolean, // Show data preview in operation info
+    debug: boolean                    // Enable/disable debug mode
 }
 ```
 
@@ -57,7 +64,7 @@ Check out the examples directory for various implementation scenarios:
 
 ## Documentation
 
-For detailed usage instructions and examples, please refer to the [examples](examples) directory.
+For detailed usage instructions and examples, please refer to the [docs](docs) directory.
 
 ## Changelog
 

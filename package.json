@@ -1,7 +1,7 @@
 {
   "name": "devextreme-datagrid-clipboard",
   "version": "1.1.0",
-  "description": "Clipboard plugin for DevExtreme DataGrid with advanced copy/paste functionality",
+  "description": "A simple clipboard plugin for DevExtreme DataGrid that shows copied data in a toast notification with table preview",
   "main": "dist/dx-datagrid-clipboard.js",
   "scripts": {
     "build": "webpack --mode production",
@@ -13,7 +13,9 @@
     "datagrid",
     "clipboard",
     "copy",
-    "paste"
+    "paste",
+    "toast",
+    "preview"
   ],
   "author": {
     "name": "Halil Tunc",
@@ -26,11 +28,17 @@
     "url": "git+https://github.com/haliltunc/devextreme-datagrid-clipboard.git"
   },
   "peerDependencies": {
-    "devextreme": ">=21.1.0"
+    "devextreme": ">=21.1.0",
+    "jquery": ">=3.5.1"
   },
   "devDependencies": {
     "http-server": "^14.0.0",
     "webpack": "^5.97.1",
-    "webpack-cli": "^4.10.0"
+    "webpack-cli": "^4.10.0",
+    "typescript": "^5.0.0",
+    "@types/jquery": "^3.5.1",
+    "ts-loader": "^9.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0"
   }
 }

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operation Info - DevExtreme DataGrid Clipboard</title>
+    
+    <!-- DevExtreme dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/23.1.6/css/dx.light.css">
+    <script src="https://cdn3.devexpress.com/jslib/23.1.6/js/dx.all.js"></script>
+    
+    <!-- Plugin -->
+    <script src="../../../src/index.js"></script>
+    
+    <!-- Site files -->
+    <link rel="stylesheet" href="../../assets/css/styles.css">
+    <script src="../../assets/js/data.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-text">DataGrid Clipboard</span>
+                <span class="version">v1.1.0</span>
+            </div>
+            <div class="nav-links">
+                <a href="../../index.html" class="nav-link">Home</a>
+                <a href="../../examples.html" class="nav-link active">Examples</a>
+                <a href="../../documentation.html" class="nav-link">Documentation</a>
+                <a href="https://github.com/codeium/devextreme-datagrid-clipboard" class="nav-link" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-container">
+            <h1>Operation Info Example</h1>
+            <p class="lead">
+                Customize operation notifications and data preview settings.
+            </p>
+
+            <div class="demo-container">
+                <!-- Grid Container -->
+                <div class="grid-container">
+                    <div id="gridContainer"></div>
+                </div>
+
+                <!-- Options Container -->
+                <div class="options-container">
+                    <div class="options-title">Options</div>
+                    <div class="options-grid">
+                        <!-- Operation Info -->
+                        <div class="option-group">
+                            <div class="option-info">
+                                <div class="option-label">Show Operation Info</div>
+                                <div class="option-description">Display notifications for operations</div>
+                            </div>
+                            <div class="option-control">
+                                <div id="showOperationInfoCheckbox"></div>
+                            </div>
+                        </div>
+
+                        <!-- Preview -->
+                        <div class="option-group">
+                            <div class="option-info">
+                                <div class="option-label">Show Preview</div>
+                                <div class="option-description">Preview data before copying</div>
+                            </div>
+                            <div class="option-control">
+                                <div id="showDataPreviewCheckbox"></div>
+                            </div>
+                        </div>
+
+                        <!-- Language -->
+                        <div class="option-group">
+                            <div class="option-info">
+                                <div class="option-label">Language</div>
+                                <div class="option-description">Change notification language</div>
+                            </div>
+                            <div class="option-control">
+                                <div id="languageSelector"></div>
+                            </div>
+                        </div>
+
+                        <!-- Debug Mode -->
+                        <div class="option-group">
+                            <div class="option-info">
+                                <div class="option-label">Debug Mode</div>
+                                <div class="option-description">Show detailed logging information</div>
+                            </div>
+                            <div class="option-control">
+                                <div id="debugModeCheckbox"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        $(() => {
+            // Initialize demo grid
+            const grid = $("#gridContainer").dxDataGrid({
+                dataSource: employees,
+                keyExpr: "id",
+                columns: [{
+                    dataField: "id",
+                    caption: "ID",
+                    width: 70
+                }, {
+                    dataField: "firstName",
+                    caption: "First Name"
+                }, {
+                    dataField: "lastName",
+                    caption: "Last Name"
+                }, {
+                    dataField: "position",
+                    caption: "Position"
+                }, {
+                    dataField: "department",
+                    caption: "Department"
+                }],
+                selection: {
+                    mode: "multiple"
+                },
+                toolbar: {
+                    items: [{
+                        widget: "dxDropDownButton",
+                        options: {
+                            text: "Copy Options",
+                            icon: "copy",
+                            dropDownOptions: {
+                                width: 300
+                            },
+                            items: [{
+                                text: "Copy Selected",
+                                icon: "copy",
+                                onClick: () => clipboard.copy()
+                            }, {
+                                text: "Copy All",
+                                icon: "copy",
+                                onClick: () => clipboard.copy({ copyAllRows: true })
+                            }, {
+                                text: "Copy with Headers",
+                                icon: "copy",
+                                onClick: () => clipboard.copy({ includeHeaders: true })
+                            }]
+                        },
+                        location: "after"
+                    }, {
+                        widget: "dxButton",
+                        options: {
+                            icon: "paste",
+                            hint: "Paste",
+                            onClick: () => clipboard.paste()
+                        },
+                        location: "after"
+                    }]
+                }
+            }).dxDataGrid("instance");
+
+            // Initialize show operation info checkbox
+            const showOperationInfoCheckbox = $("#showOperationInfoCheckbox").dxCheckBox({
+                value: true,
+                onValueChanged: () => initializeClipboard()
+            }).dxCheckBox("instance");
+
+            // Initialize show data preview checkbox
+            const showDataPreviewCheckbox = $("#showDataPreviewCheckbox").dxCheckBox({
+                value: true,
+                onValueChanged: () => initializeClipboard()
+            }).dxCheckBox("instance");
+
+            // Initialize language selector
+            const languageSelector = $("#languageSelector").dxSelectBox({
+                items: [
+                    { text: "English", value: "en" },
+                    { text: "Türkçe", value: "tr" }
+                ],
+                displayExpr: "text",
+                valueExpr: "value",
+                value: "en",
+                onValueChanged: (e) => {
+                    if (clipboard) {
+                        clipboard.setLanguage(e.value);
+                    }
+                }
+            }).dxSelectBox("instance");
+
+            // Initialize debug mode checkbox
+            const debugModeCheckbox = $("#debugModeCheckbox").dxCheckBox({
+                value: false,
+                onValueChanged: () => initializeClipboard()
+            }).dxCheckBox("instance");
+
+            // Initialize copy-paste plugin
+            let clipboard;
+
+            function initializeClipboard() {
+                // Destroy existing instance if any
+                if (clipboard) {
+                    clipboard.destroy();
+                }
+
+                // Create new instance
+                clipboard = new DataGridClipboard(grid, {
+                    showOperationInfo: showOperationInfoCheckbox.option("value"),
+                    showDataPreviewInOperationInfo: showDataPreviewCheckbox.option("value"),
+                    language: languageSelector.option("value"),
+                    debug: debugModeCheckbox.option("value")
+                });
+            }
+
+            // Initial plugin initialization
+            initializeClipboard();
+        });
+    </script>
+</body>
+</html>

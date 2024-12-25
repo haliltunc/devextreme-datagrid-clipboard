@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevExtreme DataGrid Clipboard</title>
+    
+    <!-- DevExtreme dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/23.1.6/css/dx.light.css">
+    <script src="https://cdn3.devexpress.com/jslib/23.1.6/js/dx.all.js"></script>
+    
+    <!-- Plugin -->
+    <script src="../src/index.js"></script>
+    
+    <!-- Site files -->
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <script src="assets/js/data.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-text">DevExtreme DataGrid Clipboard</span>
+                <span class="version">v1.1.0</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link active">Home</a>
+                <a href="examples.html" class="nav-link">Examples</a>
+                <a href="documentation.html" class="nav-link">Documentation</a>
+                <a href="https://github.com/haliltunc/devextreme-datagrid-clipboard" class="nav-link" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-container">
+            <h1>DevExtreme DataGrid Clipboard Plugin</h1>
+            <p class="lead">
+                A powerful clipboard integration for DevExtreme DataGrid that enables seamless copy and paste functionality.
+            </p>
+
+            <!-- Demo Grid -->
+            <div class="demo-section">
+                <h2>Demo</h2>
+                <div id="gridContainer"></div>
+            </div>
+
+            <!-- Features -->
+            <div class="features-section">
+                <h2>Key Features</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>Copy Modes</h3>
+                        <p>Support for both display and raw value copying</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Headers Support</h3>
+                        <p>Include or exclude column headers in copied data</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Row Numbers</h3>
+                        <p>Add sequence numbers to copied data</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Localization Support</h3>
+                        <p>Support for multiple languages and custom messages for a better user experience.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        $(() => {
+            // Initialize demo grid
+            const grid = $("#gridContainer").dxDataGrid({
+                dataSource: employees,
+                columns: [{
+                    dataField: "id",
+                    caption: "ID",
+                    width: 70
+                }, {
+                    dataField: "firstName",
+                    caption: "First Name"
+                }, {
+                    dataField: "lastName",
+                    caption: "Last Name"
+                }, {
+                    dataField: "position",
+                    caption: "Position"
+                }],
+                selection: {
+                    mode: "multiple"
+                },
+                toolbar: {
+                    items: [{
+                        widget: "dxButton",
+                        options: {
+                            icon: "copy",
+                            hint: "Copy",
+                            onClick: () => clipboard.copy()
+                        },
+                        location: "after"
+                    }, {
+                        widget: "dxButton",
+                        options: {
+                            icon: "paste",
+                            hint: "Paste",
+                            onClick: () => clipboard.paste()
+                        },
+                        location: "after"
+                    }]
+                }
+            }).dxDataGrid("instance");
+
+            // Initialize clipboard
+            const clipboard = new DataGridClipboard(grid, {
+                showOperationInfo: true
+            });
+        });
+    </script>
+</body>
+</html>

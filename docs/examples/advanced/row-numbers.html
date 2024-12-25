@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Row Numbers - DevExtreme DataGrid Clipboard</title>
+    
+    <!-- DevExtreme dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/23.1.6/css/dx.light.css">
+    <script src="https://cdn3.devexpress.com/jslib/23.1.6/js/dx.all.js"></script>
+    
+    <!-- Plugin -->
+    <script src="../../../src/index.js"></script>
+    
+    <!-- Site files -->
+    <link rel="stylesheet" href="../../assets/css/styles.css">
+    <script src="../../assets/js/data.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-text">DataGrid Clipboard</span>
+                <span class="version">v1.1.0</span>
+            </div>
+            <div class="nav-links">
+                <a href="../../index.html" class="nav-link">Home</a>
+                <a href="../../examples.html" class="nav-link active">Examples</a>
+                <a href="../../documentation.html" class="nav-link">Documentation</a>
+                <a href="https://github.com/codeium/devextreme-datagrid-clipboard" class="nav-link" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-container">
+            <h1>Row Numbers Example</h1>
+            <p class="lead">
+                Add sequence numbers to copied data and customize the row number column header.
+            </p>
+
+            <div class="demo-container">
+                <!-- Grid Container -->
+                <div class="grid-container">
+                    <div id="gridContainer"></div>
+                </div>
+
+                <!-- Options Container -->
+                <div class="options-container">
+                    <div class="options-title">Options</div>
+                    <div class="options-grid">
+                        <!-- Include Row Numbers -->
+                        <div class="option-group">
+                            <div class="option-info">
+                                <div class="option-label">includeRowNumbers</div>
+                                <div class="option-description">Add sequence numbers to copied data</div>
+                            </div>
+                            <div class="option-control">
+                                <div id="includeRowNumbersCheckbox"></div>
+                            </div>
+                        </div>
+
+                        <!-- Row Number Column Text -->
+                        <div class="option-group">
+                            <div class="option-info">
+                                <div class="option-label">rowNumberColumnText</div>
+                                <div class="option-description">Customize row number column header</div>
+                            </div>
+                            <div class="option-control">
+                                <div id="rowNumberColumnTextInput"></div>
+                            </div>
+                        </div>
+
+                        <!-- Headers -->
+                        <div class="option-group">
+                            <div class="option-info">
+                                <div class="option-label">includeHeaders</div>
+                                <div class="option-description">Copy column headers with data</div>
+                            </div>
+                            <div class="option-control">
+                                <div id="includeHeadersCheckbox"></div>
+                            </div>
+                        </div>
+
+                        <!-- Operation Info -->
+                        <div class="option-group">
+                            <div class="option-info">
+                                <div class="option-label">showOperationInfo</div>
+                                <div class="option-description">Display notifications for operations</div>
+                            </div>
+                            <div class="option-control">
+                                <div id="showOperationInfoCheckbox"></div>
+                            </div>
+                        </div>
+
+                        <!-- Preview -->
+                        <div class="option-group">
+                            <div class="option-info">
+                                <div class="option-label">showDataPreviewInOperationInfo</div>
+                                <div class="option-description">Preview data before copying</div>
+                            </div>
+                            <div class="option-control">
+                                <div id="showDataPreviewCheckbox"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        $(() => {
+            // Initialize demo grid
+            const grid = $("#gridContainer").dxDataGrid({
+                dataSource: employees,
+                keyExpr: "id",
+                columns: [{
+                    dataField: "id",
+                    caption: "ID",
+                    width: 70
+                }, {
+                    dataField: "firstName",
+                    caption: "First Name"
+                }, {
+                    dataField: "lastName",
+                    caption: "Last Name"
+                }, {
+                    dataField: "position",
+                    caption: "Position"
+                }, {
+                    dataField: "department",
+                    caption: "Department"
+                }],
+                selection: {
+                    mode: "multiple"
+                },
+                toolbar: {
+                    items: [{
+                        widget: "dxButton",
+                        options: {
+                            icon: "copy",
+                            hint: "Copy",
+                            onClick: () => clipboard.copy()
+                        },
+                        location: "after"
+                    }, {
+                        widget: "dxButton",
+                        options: {
+                            icon: "paste",
+                            hint: "Paste",
+                            onClick: () => clipboard.paste()
+                        },
+                        location: "after"
+                    }]
+                }
+            }).dxDataGrid("instance");
+
+            // Initialize include row numbers checkbox
+            const includeRowNumbersCheckbox = $("#includeRowNumbersCheckbox").dxCheckBox({
+                value: true,
+                onValueChanged: () => initializeClipboard()
+            }).dxCheckBox("instance");
+
+            // Initialize row number column text input
+            const rowNumberColumnTextInput = $("#rowNumberColumnTextInput").dxTextBox({
+                value: '#',
+                onValueChanged: () => initializeClipboard()
+            }).dxTextBox("instance");
+
+            // Initialize headers checkbox
+            const includeHeadersCheckbox = $("#includeHeadersCheckbox").dxCheckBox({
+                value: true,
+                onValueChanged: () => initializeClipboard()
+            }).dxCheckBox("instance");
+
+            // Initialize show operation info checkbox
+            const showOperationInfoCheckbox = $("#showOperationInfoCheckbox").dxCheckBox({
+                value: true,
+                onValueChanged: () => initializeClipboard()
+            }).dxCheckBox("instance");
+
+            // Initialize show data preview checkbox
+            const showDataPreviewCheckbox = $("#showDataPreviewCheckbox").dxCheckBox({
+                value: true,
+                onValueChanged: () => initializeClipboard()
+            }).dxCheckBox("instance");
+
+            // Initialize copy-paste plugin
+            let clipboard;
+
+            function initializeClipboard() {
+                // Destroy existing instance if any
+                if (clipboard) {
+                    clipboard.destroy();
+                }
+
+                // Create new instance
+                clipboard = new DataGridClipboard(grid, {
+                    includeRowNumbers: includeRowNumbersCheckbox.option("value"),
+                    rowNumberColumnText: rowNumberColumnTextInput.option("value"),
+                    includeHeaders: includeHeadersCheckbox.option("value"),
+                    showOperationInfo: showOperationInfoCheckbox.option("value"),
+                    showDataPreviewInOperationInfo: showDataPreviewCheckbox.option("value")
+                });
+            }
+
+            // Initial plugin initialization
+            initializeClipboard();
+        });
+    </script>
+</body>
+</html>
